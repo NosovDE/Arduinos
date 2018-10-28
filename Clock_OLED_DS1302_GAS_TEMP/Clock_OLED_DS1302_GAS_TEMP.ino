@@ -14,7 +14,7 @@ void setup() {
   myOLED.begin();
   rtc.halt(false);
   //rtc.setDOW(SUNDAY);
-// rtc.setTime(13, 31, 0);
+ // rtc.setTime(21, 28, 0);
  // rtc.setDate(28, 10, 2018);
 }
  
