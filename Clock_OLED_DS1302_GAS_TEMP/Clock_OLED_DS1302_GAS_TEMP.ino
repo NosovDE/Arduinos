@@ -3,8 +3,11 @@
 DS1302 rtc(8, 7 , 6);// (RST, DAT, CLK)
 
 // DHT датчик температуры и влажности
-#include "DHT.h"
-#define DHTPIN 4     // what digital pin we're connected to
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
+
+#define DHTPIN 2     // what digital pin we're connected to
 // Uncomment whatever type you're using!
 //#define DHTTYPE DHT11   // DHT 11
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
@@ -22,7 +25,8 @@ DS1302 rtc(8, 7 , 6);// (RST, DAT, CLK)
 // tweak the timings for faster processors.  This parameter is no longer needed
 // as the current DHT reading algorithm adjusts itself to work on faster procs.
 DHT dht(DHTPIN, DHTTYPE);
-
+float hum = 0;
+float tmp = 0;
 
 // OLED экран
 #include <OLED_I2C.h>
@@ -44,12 +48,14 @@ MQ135 gasSensor = MQ135(A0);
 char compileTime[] = __TIME__;
 char compileDate[] = __DATE__;
 Time t;
+byte i = 0;
+
 
 void setup() {
   // Serial.begin(9600);
   dht.begin();
 
-  float rzero = gasSensor.getRZero();
+  // float rzero = gasSensor.getRZero();
   //  Serial.println("rzero=" + (String)rzero);
 
   myOLED.begin();
@@ -164,28 +170,36 @@ void loop() {
   // myOLED.update();
   // delay(500);
 
-  // меряем газ
-  float ppm = gasSensor.getPPM();
-  //Serial.println("GAS: " + (String)round(ppm) + " ppm");
-
-  myOLED.setFont(RusFont);
-  // myOLED.print("-", 51, 12);
-  myOLED.print("CJ2   " + String(round(ppm)) + "hhv  " , 8, 15);
 
   //  myOLED.setFont(SmallFont);
   //myOLED.print("ppm" , 100, 45);
 
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
+  if (i % 2 == 0) {
+    // Reading temperature or humidity takes about 250 milliseconds!
+    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+    hum = dht.readHumidity();
+    // Read temperature as Celsius (the default)
+    tmp = dht.readTemperature();
+    i = 0;
+  }
+  i++;
 
-  myOLED.print("Dkf;yjcnm   " + (isnan(h) ? "--" : String(h)) + "%" , 8, 25);
-  myOLED.print("Ntvgthfnehf   " + (isnan(t) ? "--" : String(t)) + "*C" , 8, 35);
+  // меряем газ
+  float ppm = gasSensor.getCorrectedPPM(tmp, hum);
+  //float ppm = gasSensor.getPPM();
+  //Serial.println("GAS: " + (String)round(ppm) + " ppm");
+
+
+  myOLED.setFont(SmallFont);
+  // myOLED.print("-", 51, 12);
+  myOLED.print("CO2   " + String(ppm) + "ppm  " , 5, 14);
+
+  myOLED.setFont(RusFont);
+  myOLED.print("Dkf;yjcnm   " + (isnan(hum) ? "--" : String(round(hum))) + "%" , 8, 25);
+  myOLED.print("Ntvgthfnehf   " + (isnan(tmp) ? "--" : String(round(tmp))) + " C" , 8, 35);
 
   myOLED.update();
-  delay(2000);
+  delay(1000);
   myOLED.clrScr();
 }
 
