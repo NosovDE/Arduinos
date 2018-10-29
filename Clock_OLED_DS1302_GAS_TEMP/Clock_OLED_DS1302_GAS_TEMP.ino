@@ -1,23 +1,82 @@
+// Часы DS1302
 #include <DS1302.h>
-#include <OLED_I2C.h> 
-OLED  myOLED(SDA, SCL, 8); 
+DS1302 rtc(8, 7 , 6);// (RST, DAT, CLK)
+
+// DHT датчик температуры и влажности
+#include "DHT.h"
+#define DHTPIN 4     // what digital pin we're connected to
+// Uncomment whatever type you're using!
+//#define DHTTYPE DHT11   // DHT 11
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+//#define DHTTYPE DHT21   // DHT 21 (AM2301)
+
+// Connect pin 1 (on the left) of the sensor to +5V
+// NOTE: If using a board with 3.3V logic like an Arduino Due connect pin 1
+// to 3.3V instead of 5V!
+// Connect pin 2 of the sensor to whatever your DHTPIN is
+// Connect pin 4 (on the right) of the sensor to GROUND
+// Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
+
+// Initialize DHT sensor.
+// Note that older versions of this library took an optional third parameter to
+// tweak the timings for faster processors.  This parameter is no longer needed
+// as the current DHT reading algorithm adjusts itself to work on faster procs.
+DHT dht(DHTPIN, DHTTYPE);
+
+
+// OLED экран
+#include <OLED_I2C.h>
+OLED  myOLED(SDA, SCL, 8);
 extern uint8_t MegaNumbers[];
 extern uint8_t RusFont[];
 extern uint8_t SmallFont[];
- 
 
-DS1302 rtc(8, 7 , 6);// (RST, DAT, CLK)
 
+// Датчик качества воздуха
+#include <MQ135.h>
+//#define RZERO 76.63
+#define RZERO 64.46
+MQ135 gasSensor = MQ135(A0);
+
+
+
+//Массив, содержащий время компиляции
+char compileTime[] = __TIME__;
+char compileDate[] = __DATE__;
 Time t;
- 
+
 void setup() {
+  // Serial.begin(9600);
+  dht.begin();
+
+  float rzero = gasSensor.getRZero();
+  //  Serial.println("rzero=" + (String)rzero);
+
   myOLED.begin();
   rtc.halt(false);
   //rtc.setDOW(SUNDAY);
- // rtc.setTime(21, 28, 0);
- // rtc.setDate(28, 10, 2018);
+
+  //Получаем число из строки, зная номер первого символа
+  byte hour = getInt(compileTime, 0);
+  byte minute = getInt(compileTime, 3);
+  byte second = getInt(compileTime, 6);
+
+  //Serial.println("hour=" + (String)hour);
+  //Serial.println("minutes=" + (String)minute);
+  //Serial.println("second=" + (String)second);
+
+  //Serial.println("compileDate=" + (String)compileDate);
+
+  byte day = getInt(compileDate, 4);
+  int year = getInt(compileDate, 7);
+
+  //Serial.println("day=" + (String)day);
+  //Serial.println("year=" + (String)year);
+
+  rtc.setTime(getInt(__TIME__, 0), getInt(__TIME__, 3), getInt(__TIME__, 6));
+  rtc.setDate(day, 10, 2018);
 }
- 
+
 void loop() {
   myOLED.setFont(RusFont);
   t = rtc.getTime();
@@ -32,9 +91,11 @@ void loop() {
     case 7:     myOLED.print("DJCRHTCTYMT", CENTER, 0);    break;
   }
   String stringOne = rtc.getTimeStr();
-  myOLED.setFont(MegaNumbers);
-  myOLED.print(stringOne.substring(0, 2), 4, 12);
-  myOLED.print("/", 51, 12);
+  /*
+    myOLED.setFont(MegaNumbers);
+    myOLED.print(stringOne.substring(0, 2), 4, 12);
+    myOLED.print("/", 51, 12);
+  */
   myOLED.print(stringOne.substring(3, 5), 75, 12);
   myOLED.setFont(RusFont);
   switch (t.mon)
@@ -100,10 +161,35 @@ void loop() {
       myOLED.print(String(t.year), 92, 57);
       break;
   }
+  // myOLED.update();
+  // delay(500);
+
+  // меряем газ
+  float ppm = gasSensor.getPPM();
+  //Serial.println("GAS: " + (String)round(ppm) + " ppm");
+
+  myOLED.setFont(RusFont);
+  // myOLED.print("-", 51, 12);
+  myOLED.print("CJ2   " + String(round(ppm)) + "hhv  " , 8, 15);
+
+  //  myOLED.setFont(SmallFont);
+  //myOLED.print("ppm" , 100, 45);
+
+  // Reading temperature or humidity takes about 250 milliseconds!
+  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+  float h = dht.readHumidity();
+  // Read temperature as Celsius (the default)
+  float t = dht.readTemperature();
+
+  myOLED.print("Dkf;yjcnm   " + (isnan(h) ? "--" : String(h)) + "%" , 8, 25);
+  myOLED.print("Ntvgthfnehf   " + (isnan(t) ? "--" : String(t)) + "*C" , 8, 35);
+
   myOLED.update();
-  delay(500);
-  myOLED.setFont(MegaNumbers);
-  myOLED.print("-", 51, 12);
-  myOLED.update();
-  delay(500);
+  delay(2000);
+  myOLED.clrScr();
+}
+
+//Содержимое функции объяснено ниже
+char getInt(const char* string, int startIndex) {
+  return int(string[startIndex] - '0') * 10 + int(string[startIndex + 1]) - '0';
 }
