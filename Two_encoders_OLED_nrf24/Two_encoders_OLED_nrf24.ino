@@ -119,7 +119,7 @@ void updateScreen(long left, long right) {
   myOLED.print(String(right), 80, 20);
 
   myOLED.drawRoundRect(67, 16, 127, 63);
-  myOLED.drawLine(67, 50, 123, 50);
+  myOLED.drawLine(67, 50, 127, 50);
 
 
   myOLED.update();
