@@ -88,21 +88,21 @@ void loop() {
   t = rtc.getTime();
   switch (t.dow)
   {
-    case 1:     myOLED.print("GJYTLTKMYBR", CENTER, 0);    break;
-    case 2:     myOLED.print("DNJHYBR", CENTER, 0);        break;
-    case 3:     myOLED.print("CHTLF", CENTER, 0);          break;
-    case 4:     myOLED.print("XTNDTHU", CENTER, 0);        break;
-    case 5:     myOLED.print("GZNYBWF", CENTER, 0);        break;
-    case 6:     myOLED.print("CE<<JNF", CENTER, 0);        break;
-    case 7:     myOLED.print("DJCRHTCTYMT", CENTER, 0);    break;
+    case 1:     myOLED.print("GJYTLTKMYBR", RIGHT, 0);    break;
+    case 2:     myOLED.print("DNJHYBR", RIGHT, 0);        break;
+    case 3:     myOLED.print("CHTLF", RIGHT, 0);          break;
+    case 4:     myOLED.print("XTNDTHU", RIGHT, 0);        break;
+    case 5:     myOLED.print("GZNYBWF", RIGHT, 0);        break;
+    case 6:     myOLED.print("CE<<JNF", RIGHT, 0);        break;
+    case 7:     myOLED.print("DJCRHTCTYMT", RIGHT, 0);    break;
   }
   String stringOne = rtc.getTimeStr();
-  /*
-    myOLED.setFont(MegaNumbers);
-    myOLED.print(stringOne.substring(0, 2), 4, 12);
-    myOLED.print("/", 51, 12);
-  */
-  myOLED.print(stringOne.substring(3, 5), 75, 12);
+
+  myOLED.setFont(SmallFont);
+  myOLED.print(stringOne.substring(0, 2), 0, 0);
+  myOLED.print(":", 13, 0);
+  myOLED.print(stringOne.substring(3, 5), 18, 0);
+
   myOLED.setFont(RusFont);
   switch (t.mon)
   {
@@ -167,8 +167,8 @@ void loop() {
       myOLED.print(String(t.year), 92, 57);
       break;
   }
-  // myOLED.update();
-  // delay(500);
+  myOLED.update();
+  delay(500);
 
 
   //  myOLED.setFont(SmallFont);
@@ -191,16 +191,27 @@ void loop() {
 
 
   myOLED.setFont(SmallFont);
-  // myOLED.print("-", 51, 12);
-  myOLED.print("CO2   " + String(ppm) + "ppm  " , 5, 14);
+
+  // Разделитель в часах
+  myOLED.print(" ", 13, 0);
+  // Линии горизонтальные
+  /*
+  myOLED.drawLine(0, 11, 127, 11);
+  myOLED.drawLine(0, 53, 127, 53);
+myOLED.drawLine(0, 11, 0, 53);
+myOLED.drawLine(127, 11, 127, 53);
+*/
+myOLED.drawRoundRect(0, 11,127, 53 );
+
+  myOLED.print("CO2   " + String(ppm) + "ppm  " , 5, 18);
 
   myOLED.setFont(RusFont);
-  myOLED.print("Dkf;yjcnm   " + (isnan(hum) ? "--" : String(round(hum))) + "%" , 8, 25);
-  myOLED.print("Ntvgthfnehf   " + (isnan(tmp) ? "--" : String(round(tmp))) + " C" , 8, 35);
+  myOLED.print("Dkf;yjcnm   " + (isnan(hum) ? "--" : String(round(hum))) + "%" , 5, 29);
+  myOLED.print("Ntvgthfnehf   " + (isnan(tmp) ? "--" : String(round(tmp))) + " C" , 5, 40);
 
   myOLED.update();
-  delay(1000);
-  myOLED.clrScr();
+  delay(500);
+  // myOLED.clrScr();
 }
 
 //Содержимое функции объяснено ниже
