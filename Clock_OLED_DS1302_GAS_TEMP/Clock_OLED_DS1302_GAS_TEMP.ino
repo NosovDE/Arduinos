@@ -38,8 +38,6 @@ extern uint8_t SmallFont[];
 
 // Датчик качества воздуха
 #include <MQ135.h>
-//#define RZERO 76.63
-#define RZERO 64.46
 MQ135 gasSensor = MQ135(A0);
 
 
@@ -181,37 +179,32 @@ void loop() {
     // Read temperature as Celsius (the default)
     tmp = dht.readTemperature();
     i = 0;
+
+    // меряем газ
+    //float ppm = gasSensor.getCorrectedPPM(tmp, hum);
+    float ppm = gasSensor.getPPM();
+    
+    // Датчик газа
+    myOLED.setFont(SmallFont);
+    myOLED.print(" CO2", LEFT, 18);
+    myOLED.print(String(ppm) + "ppm " , RIGHT, 18);
   }
   i++;
-
-  // меряем газ
-  float ppm = gasSensor.getCorrectedPPM(tmp, hum);
-  //float ppm = gasSensor.getPPM();
-  //Serial.println("GAS: " + (String)round(ppm) + " ppm");
-
 
   myOLED.setFont(SmallFont);
 
   // Разделитель в часах
   myOLED.print(" ", 13, 0);
-  // Линии горизонтальные
-  /*
-  myOLED.drawLine(0, 11, 127, 11);
-  myOLED.drawLine(0, 53, 127, 53);
-myOLED.drawLine(0, 11, 0, 53);
-myOLED.drawLine(127, 11, 127, 53);
-*/
-myOLED.drawRoundRect(0, 11,127, 53 );
+  // Рамка
+  myOLED.drawRoundRect(0, 11, 127, 53 );
 
-  myOLED.print("CO2   " + String(ppm) + "ppm  " , 5, 18);
-
+  // Датчик температуры и влажности
   myOLED.setFont(RusFont);
   myOLED.print("Dkf;yjcnm   " + (isnan(hum) ? "--" : String(round(hum))) + "%" , 5, 29);
   myOLED.print("Ntvgthfnehf   " + (isnan(tmp) ? "--" : String(round(tmp))) + " C" , 5, 40);
 
   myOLED.update();
   delay(500);
-  // myOLED.clrScr();
 }
 
 //Содержимое функции объяснено ниже
