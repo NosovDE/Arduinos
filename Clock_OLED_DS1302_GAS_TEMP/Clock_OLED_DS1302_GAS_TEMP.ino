@@ -57,6 +57,10 @@ extern uint8_t SmallFont[];
 // Датчик качества воздуха
 #include <MQ135.h>
 MQ135 gasSensor = MQ135(A0);
+/// The load resistance on the board
+#define RLOAD 1.0
+/// Calibration resistance at atmospheric CO2 level
+#define RZERO 350.00
 
 
 
@@ -205,7 +209,9 @@ void loop() {
     // Датчик газа
     myOLED.setFont(SmallFont);
     myOLED.print(" CO2", LEFT, 18);
-    myOLED.print(String(ppm) + "ppm " , 50, 18);
+    myOLED.printNumI(ppm , 80, 18);
+    myOLED.print("ppm " , RIGHT, 18);
+    
   }
   i++;
 
