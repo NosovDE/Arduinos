@@ -76,7 +76,7 @@ void setup() {
 
   myOLED.begin();
   rtc.halt(false);
-  rtc.setDOW(4);
+  rtc.setDOW(5);
 
   //Получаем число из строки, зная номер первого символа
   byte hour = getInt(compileTime, 0);
@@ -96,7 +96,7 @@ void setup() {
   //Serial.println("year=" + (String)year);
 
   rtc.setTime(getInt(__TIME__, 0), getInt(__TIME__, 3), getInt(__TIME__, 6));
-  rtc.setDate(01, 11, 2018);
+  rtc.setDate(02, 11, 2018);
 }
 
 void loop() {
