@@ -1,3 +1,21 @@
+/*
+#include "GyverFilters.h"
+// параметры: разброс измерения, разброс оценки, скорость изменения значений
+// разброс измерения: шум измерений
+// разброс оценки: подстраивается сам, можно поставить таким же как разброс измерения
+// скорость изменения значений: 0.001-1, варьировать самому
+
+//GKalman testFilter(40, 40, 0.5);
+
+// также может быть объявлен как (разброс измерения, скорость изменения значений)
+GKalman testFilter(400, 0.01);
+*/
+#include "GyverFilters.h"
+GMedian3 testFilter;
+
+
+
+
 // Часы DS1302
 #include <DS1302.h>
 DS1302 rtc(8, 7 , 6);// (RST, DAT, CLK)
@@ -58,7 +76,7 @@ void setup() {
 
   myOLED.begin();
   rtc.halt(false);
-  //rtc.setDOW(SUNDAY);
+  rtc.setDOW(4);
 
   //Получаем число из строки, зная номер первого символа
   byte hour = getInt(compileTime, 0);
@@ -78,7 +96,7 @@ void setup() {
   //Serial.println("year=" + (String)year);
 
   rtc.setTime(getInt(__TIME__, 0), getInt(__TIME__, 3), getInt(__TIME__, 6));
-  rtc.setDate(day, 10, 2018);
+  rtc.setDate(01, 11, 2018);
 }
 
 void loop() {
@@ -182,12 +200,12 @@ void loop() {
 
     // меряем газ
     //float ppm = gasSensor.getCorrectedPPM(tmp, hum);
-    float ppm = gasSensor.getPPM();
+    int ppm = testFilter.filtered((int)gasSensor.getPPM());
     
     // Датчик газа
     myOLED.setFont(SmallFont);
     myOLED.print(" CO2", LEFT, 18);
-    myOLED.print(String(ppm) + "ppm " , RIGHT, 18);
+    myOLED.print(String(ppm) + "ppm " , 50, 18);
   }
   i++;
 
