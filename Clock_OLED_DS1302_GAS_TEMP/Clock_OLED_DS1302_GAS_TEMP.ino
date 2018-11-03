@@ -49,10 +49,14 @@ float tmp = 0;
 // OLED экран
 #include <OLED_I2C.h>
 OLED  myOLED(SDA, SCL, 8);
-extern uint8_t MegaNumbers[];
+//extern uint8_t MegaNumbers[];
 extern uint8_t RusFont[];
 extern uint8_t SmallFont[];
 
+
+#include "GyverEncoder.h"
+Encoder encoder(5, 3, 4);
+int count = 0;
 
 // Датчик качества воздуха
 #include <MQ135.h>
@@ -63,10 +67,16 @@ MQ135 gasSensor = MQ135(A0);
 #define RZERO 350.00
 
 
+// подключение библиотек SPI и SD:
+//#include <SPI.h>
+#include <SD.h>
+const byte PIN_CS = 10;                         // указываем номер вывода arduino подключенного к выводу CS адаптера
+//File myFile;
+
 
 //Массив, содержащий время компиляции
-char compileTime[] = __TIME__;
-char compileDate[] = __DATE__;
+//char compileTime[] = __TIME__;
+//char compileDate[] = __DATE__;
 Time t;
 byte i = 0;
 
@@ -75,6 +85,7 @@ void setup() {
   // Serial.begin(9600);
   dht.begin();
 
+  encoder.setType(TYPE2);
   // float rzero = gasSensor.getRZero();
   //  Serial.println("rzero=" + (String)rzero);
 
@@ -83,9 +94,9 @@ void setup() {
   rtc.setDOW(5);
 
   //Получаем число из строки, зная номер первого символа
-  byte hour = getInt(compileTime, 0);
-  byte minute = getInt(compileTime, 3);
-  byte second = getInt(compileTime, 6);
+ // byte hour = getInt(compileTime, 0);
+ // byte minute = getInt(compileTime, 3);
+ // byte second = getInt(compileTime, 6);
 
   //Serial.println("hour=" + (String)hour);
   //Serial.println("minutes=" + (String)minute);
@@ -93,13 +104,48 @@ void setup() {
 
   //Serial.println("compileDate=" + (String)compileDate);
 
-  byte day = getInt(compileDate, 4);
-  int year = getInt(compileDate, 7);
+  //byte day = getInt(compileDate, 4);
+ // int year = getInt(compileDate, 7);
 
   //Serial.println("day=" + (String)day);
   //Serial.println("year=" + (String)year);
 
   rtc.setTime(getInt(__TIME__, 0), getInt(__TIME__, 3), getInt(__TIME__, 6));
+  rtc.setDate(1, 11, 2018);
+
+/*
+  //используем ответ инициализации, для определения работоспособности карты и адаптера
+  if(!SD.begin(PIN_CS)){                           // инициализация SD карты с указанием номера вывода CS
+    Serial.println("SD-card not found"); return;   // ошибка инициализации. карта не обнаружена или не подключён (неправильно подключён) адаптер карт MicroSD
+  }
+
+//проверяем наличие файла "iarduino.txt" на SD-карте
+
+  if(SD.exists("iarduino.txt")){                   // если файл с именем "iarduino.txt" существует, то ...
+    Serial.println("file exists");
+  }else{                                           // иначе ...
+    Serial.println("file doesn't exist");
+  }
+/*
+//открываем файл "iarduino.txt" для чтения и записи, начиная с конца файла, и записываем в него строку
+  myFile = SD.open("iarduino.txt", FILE_WRITE);    // если файла с именем "iarduino.txt" - нет, то он будет создан.
+  if(myFile){                                      // если файл доступен (открыт для записи), то ...
+    Serial.println("file is opened");
+    myFile.print("The beginning of a line, ");     // записываем первую часть строки в файл
+    myFile.println("The end of the line");         // записываем вторую часть строки в файл
+    Serial.println("data written to the file");
+    myFile.close();                                // закрываем файл
+    Serial.println("file is closed");
+  }else{                                           // иначе ...
+    Serial.println("file is not opened");
+  }
+//проверяем наличие файла "iarduino.txt" на SD-карте
+  if(SD.exists("iarduino.txt")){                   // если файл с именем "iarduino.txt" существует, то ...
+    Serial.println("file exists");
+  }else{                                           // иначе ...
+    Serial.println("file doesn't exist");
+  }
+  */
   rtc.setDate(02, 11, 2018);
 }
 
@@ -187,6 +233,17 @@ void loop() {
       myOLED.print(String(t.year), 92, 57);
       break;
   }
+  encoder.tick();
+  if (encoder.isRight())
+  {
+    count--;
+  }
+  if (encoder.isLeft())
+  {
+    count++;
+  }
+
+  myOLED.print(String(count), LEFT, 57);
   myOLED.update();
   delay(500);
 
@@ -211,7 +268,7 @@ void loop() {
     myOLED.print(" CO2", LEFT, 18);
     myOLED.printNumI(ppm , 80, 18);
     myOLED.print("ppm " , RIGHT, 18);
-    
+
   }
   i++;
 
