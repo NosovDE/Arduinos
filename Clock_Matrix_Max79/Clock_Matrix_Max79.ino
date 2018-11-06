@@ -3,9 +3,7 @@
 #include <Max72xxPanel.h>
 #include <Wire.h>
 #include <DS3231.h>
-#include "Adafruit_HTU21DF.h"
-
-
+#include <Adafruit_HTU21DF.h>
 
 DS3231 clock;
 RTCDateTime dt;
