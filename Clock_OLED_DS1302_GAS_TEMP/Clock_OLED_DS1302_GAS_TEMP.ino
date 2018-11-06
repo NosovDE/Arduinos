@@ -1,14 +1,14 @@
 /*
-#include "GyverFilters.h"
-// параметры: разброс измерения, разброс оценки, скорость изменения значений
-// разброс измерения: шум измерений
-// разброс оценки: подстраивается сам, можно поставить таким же как разброс измерения
-// скорость изменения значений: 0.001-1, варьировать самому
+  #include "GyverFilters.h"
+  // параметры: разброс измерения, разброс оценки, скорость изменения значений
+  // разброс измерения: шум измерений
+  // разброс оценки: подстраивается сам, можно поставить таким же как разброс измерения
+  // скорость изменения значений: 0.001-1, варьировать самому
 
-//GKalman testFilter(40, 40, 0.5);
+  //GKalman testFilter(40, 40, 0.5);
 
-// также может быть объявлен как (разброс измерения, скорость изменения значений)
-GKalman testFilter(400, 0.01);
+  // также может быть объявлен как (разброс измерения, скорость изменения значений)
+  GKalman testFilter(400, 0.01);
 */
 #include "GyverFilters.h"
 GMedian3 testFilter;
@@ -23,7 +23,7 @@ DS1302 rtc(8, 7 , 6);// (RST, DAT, CLK)
 // DHT датчик температуры и влажности
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
-#include <DHT_U.h>
+//#include <DHT_U.h>
 
 #define DHTPIN 2     // what digital pin we're connected to
 // Uncomment whatever type you're using!
@@ -67,12 +67,6 @@ MQ135 gasSensor = MQ135(A0);
 #define RZERO 350.00
 
 
-// подключение библиотек SPI и SD:
-//#include <SPI.h>
-#include <SD.h>
-const byte PIN_CS = 10;                         // указываем номер вывода arduino подключенного к выводу CS адаптера
-//File myFile;
-
 
 //Массив, содержащий время компиляции
 //char compileTime[] = __TIME__;
@@ -90,63 +84,14 @@ void setup() {
   //  Serial.println("rzero=" + (String)rzero);
 
   myOLED.begin();
-  rtc.halt(false);
-  rtc.setDOW(5);
 
-  //Получаем число из строки, зная номер первого символа
- // byte hour = getInt(compileTime, 0);
- // byte minute = getInt(compileTime, 3);
- // byte second = getInt(compileTime, 6);
+  // Установка времени
+  rtc.halt(false); //запуск часов
+  rtc.writeProtect(false); //снять защиту от записи
 
-  //Serial.println("hour=" + (String)hour);
-  //Serial.println("minutes=" + (String)minute);
-  //Serial.println("second=" + (String)second);
-
-  //Serial.println("compileDate=" + (String)compileDate);
-
-  //byte day = getInt(compileDate, 4);
- // int year = getInt(compileDate, 7);
-
-  //Serial.println("day=" + (String)day);
-  //Serial.println("year=" + (String)year);
-
+  rtc.setDOW(2);
   rtc.setTime(getInt(__TIME__, 0), getInt(__TIME__, 3), getInt(__TIME__, 6));
-  rtc.setDate(1, 11, 2018);
-
-/*
-  //используем ответ инициализации, для определения работоспособности карты и адаптера
-  if(!SD.begin(PIN_CS)){                           // инициализация SD карты с указанием номера вывода CS
-    Serial.println("SD-card not found"); return;   // ошибка инициализации. карта не обнаружена или не подключён (неправильно подключён) адаптер карт MicroSD
-  }
-
-//проверяем наличие файла "iarduino.txt" на SD-карте
-
-  if(SD.exists("iarduino.txt")){                   // если файл с именем "iarduino.txt" существует, то ...
-    Serial.println("file exists");
-  }else{                                           // иначе ...
-    Serial.println("file doesn't exist");
-  }
-/*
-//открываем файл "iarduino.txt" для чтения и записи, начиная с конца файла, и записываем в него строку
-  myFile = SD.open("iarduino.txt", FILE_WRITE);    // если файла с именем "iarduino.txt" - нет, то он будет создан.
-  if(myFile){                                      // если файл доступен (открыт для записи), то ...
-    Serial.println("file is opened");
-    myFile.print("The beginning of a line, ");     // записываем первую часть строки в файл
-    myFile.println("The end of the line");         // записываем вторую часть строки в файл
-    Serial.println("data written to the file");
-    myFile.close();                                // закрываем файл
-    Serial.println("file is closed");
-  }else{                                           // иначе ...
-    Serial.println("file is not opened");
-  }
-//проверяем наличие файла "iarduino.txt" на SD-карте
-  if(SD.exists("iarduino.txt")){                   // если файл с именем "iarduino.txt" существует, то ...
-    Serial.println("file exists");
-  }else{                                           // иначе ...
-    Serial.println("file doesn't exist");
-  }
-  */
-  rtc.setDate(02, 11, 2018);
+  rtc.setDate(06, 11, 2018);
 }
 
 void loop() {
@@ -262,7 +207,7 @@ void loop() {
     // меряем газ
     //float ppm = gasSensor.getCorrectedPPM(tmp, hum);
     int ppm = testFilter.filtered((int)gasSensor.getPPM());
-    
+
     // Датчик газа
     myOLED.setFont(SmallFont);
     myOLED.print(" CO2", LEFT, 18);
