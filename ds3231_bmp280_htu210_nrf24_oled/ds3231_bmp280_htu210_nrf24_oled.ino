@@ -1,3 +1,16 @@
+#include <Adafruit_NeoPixel.h>
+#define PIN 8 // номер порта к которому подключен модуль
+#define count_led 1 // количество светодиодов 
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, 8, NEO_GRB + NEO_KHZ800);
+
+/*
+  #include "Ai_WS2811.h"
+  #define DATA_PIN 8
+  #define NUM_LEDS 1
+  Ai_WS2811 ws2811;
+*/
+
+
 #include <Wire.h>
 #include <BH1750.h>
 BH1750 lightMeter;
@@ -67,13 +80,44 @@ void setup() {
   pinMode(ledPin2, OUTPUT);
 
 
-lightMeter.begin();
+  lightMeter.begin();
+  //ws2811.init(DATA_PIN);
+  pixels.begin();
+ // pixels.show(); // Устанавливаем все светодиоды в состояние "Выключено"
 }
 
-
+byte a = 0x00;
+byte b = 0xff;
 
 void loop() {
 
+  pixels.setPixelColor(0, pixels.Color(0, 0, 150)); // Назначаем для первого светодиода цвет "Зеленый"
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(0, pixels.Color(250, 0, 0)); // Назначаем для первого светодиода цвет "Зеленый"
+  pixels.show();
+  delay(1000);
+
+  /*
+    for (int i = 0; i < 100; i++) {
+    ws2811.setColor(0x0, 0x0, 0xFF);
+    sendLEDs();
+    _delay_ms(100);
+
+    ws2811.setColor(0, 0xFF, 0x0);
+    sendLEDs();
+    _delay_ms(100);
+
+    }
+    /*
+    ws2811.setColor(a,b,a);
+    sendLEDs();
+    _delay_ms(1000);
+
+    ws2811.setColor(b,a,a);
+    sendLEDs();
+    _delay_ms(1000);
+  */
   //Read values from the sensor:
   pressure = bmp.readPressure();
   temperature = bmp.readTemperature();
@@ -91,7 +135,7 @@ void loop() {
   myOLED.print("T: " + (String)temperature + " C" , CENTER, 45);
   myOLED.print("A: " + (String)altimeter + " m" , CENTER, 55);
 
-uint16_t lux = lightMeter.readLightLevel();
+  uint16_t lux = lightMeter.readLightLevel();
 
   myOLED.print("light: " + (String)lux + " lux" , CENTER, 20);
 
@@ -162,6 +206,15 @@ uint16_t lux = lightMeter.readLightLevel();
     digitalWrite (ledPin2, HIGH);
   }
 
- // delay(10); // Ждем
+  // delay(10); // Ждем
   // delay(1000);
+}
+
+void sendLEDs()
+{
+  cli();
+  for (byte i = 0; i < 1; ++i) {
+//    ws2811.send();
+  }
+  sei();
 }
