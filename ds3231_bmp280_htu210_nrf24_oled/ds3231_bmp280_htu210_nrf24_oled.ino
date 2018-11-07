@@ -1,3 +1,9 @@
+#include <Wire.h>
+#include <BH1750.h>
+BH1750 lightMeter;
+
+
+
 // Часы DS3231
 //#include <DS3231.h>
 //DS3231  rtc(SDA, SCL);
@@ -60,6 +66,8 @@ void setup() {
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
 
+
+lightMeter.begin();
 }
 
 
@@ -82,6 +90,11 @@ void loop() {
   myOLED.print("P: " + (String)(pressure / 133.3224) + " mm.r.s" , CENTER, 35);
   myOLED.print("T: " + (String)temperature + " C" , CENTER, 45);
   myOLED.print("A: " + (String)altimeter + " m" , CENTER, 55);
+
+uint16_t lux = lightMeter.readLightLevel();
+
+  myOLED.print("light: " + (String)lux + " lux" , CENTER, 20);
+
 
   // Time
   // String time = rtc.getTimeStr();
