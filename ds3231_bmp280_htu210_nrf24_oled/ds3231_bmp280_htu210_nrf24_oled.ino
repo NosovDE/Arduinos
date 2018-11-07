@@ -83,21 +83,36 @@ void setup() {
   lightMeter.begin();
   //ws2811.init(DATA_PIN);
   pixels.begin();
- // pixels.show(); // Устанавливаем все светодиоды в состояние "Выключено"
+  // pixels.show(); // Устанавливаем все светодиоды в состояние "Выключено"
 }
 
-byte a = 0x00;
-byte b = 0xff;
-
+ uint16_t lux = 32000;
 void loop() {
+  for (int i = 0; lux<200 && i < 3; i++) {
+    pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // Назначаем для первого светодиода цвет "Зеленый"
+    pixels.show();
+    delay(50);
+    pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Назначаем для первого светодиода цвет "Зеленый"
+    pixels.show();
+    delay(50);
+    pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // Назначаем для первого светодиода цвет "Зеленый"
+    pixels.show();
+    delay(100);
 
-  pixels.setPixelColor(0, pixels.Color(0, 0, 150)); // Назначаем для первого светодиода цвет "Зеленый"
-  pixels.show();
-  delay(1000);
-  pixels.setPixelColor(0, pixels.Color(250, 0, 0)); // Назначаем для первого светодиода цвет "Зеленый"
-  pixels.show();
-  delay(1000);
+    pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // Назначаем для первого светодиода цвет "Зеленый"
+    pixels.show();
+    delay(50);
+    pixels.setPixelColor(0, pixels.Color(0, 0, 0)); // Назначаем для первого светодиода цвет "Зеленый"
+    pixels.show();
+    delay(50);
+    pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // Назначаем для первого светодиода цвет "Зеленый"
+    pixels.show();
+    delay(100);
 
+
+  }
+  pixels.setPixelColor(0, pixels.Color(0, 0, 0)); 
+  pixels.show();
   /*
     for (int i = 0; i < 100; i++) {
     ws2811.setColor(0x0, 0x0, 0xFF);
@@ -135,7 +150,7 @@ void loop() {
   myOLED.print("T: " + (String)temperature + " C" , CENTER, 45);
   myOLED.print("A: " + (String)altimeter + " m" , CENTER, 55);
 
-  uint16_t lux = lightMeter.readLightLevel();
+   lux = lightMeter.readLightLevel();
 
   myOLED.print("light: " + (String)lux + " lux" , CENTER, 20);
 
@@ -214,7 +229,7 @@ void sendLEDs()
 {
   cli();
   for (byte i = 0; i < 1; ++i) {
-//    ws2811.send();
+    //    ws2811.send();
   }
   sei();
 }
