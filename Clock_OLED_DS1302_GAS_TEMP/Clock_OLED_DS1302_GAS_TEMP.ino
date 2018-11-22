@@ -89,9 +89,9 @@ void setup() {
   rtc.halt(false); //запуск часов
   rtc.writeProtect(false); //снять защиту от записи
 
-  rtc.setDOW(2);
+  rtc.setDOW(7);
   rtc.setTime(getInt(__TIME__, 0), getInt(__TIME__, 3), getInt(__TIME__, 6));
-  rtc.setDate(06, 11, 2018);
+  rtc.setDate(18, 11, 2018);
 }
 
 void loop() {

@@ -17,7 +17,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #include <DHT.h>
 //#include <DHT_U.h>
 
-#define DHTPIN A0     // what digital pin we're connected to
+#define DHTPIN D4     // what digital pin we're connected to
 // Uncomment whatever type you're using!
 #define DHTTYPE DHT11   // DHT 11
 //#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
