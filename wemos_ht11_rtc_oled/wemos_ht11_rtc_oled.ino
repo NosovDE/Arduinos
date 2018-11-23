@@ -37,20 +37,21 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 DHT dht(DHTPIN, DHTTYPE);
 float hum = 0;
 float tmp = 0;
-
+String temperature = "--";
+String humidity = "--";
 
 #include "RTClib.h"
 RTC_DS1307 rtc;
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+char daysOfTheWeek[7][40] = {"Воскресенье", "Monday", "Tuesday", "Wednesday", "Thursday", "ПЯТНИЦА", "Saturday"};
 
-
+unsigned long main_timer; 
 
 void setup() {
   Serial.begin(9600);
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
-    Serial.println(F("SSD1306 allocation failed"));
+    //Serial.println(F("SSD1306 allocation failed"));
     for (;;); // Don't proceed, loop forever
   }
   dht.begin();
@@ -60,19 +61,37 @@ void setup() {
     while (1);
   }
 
-  if (! rtc.isrunning()) {
-    Serial.println("RTC is NOT running!");
+  //if (! rtc.isrunning()) {
+   // Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+   // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     // This line sets the RTC with an explicit date & time, for example to set
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-  }
+  //}
 }
 
 void loop() {
   DateTime now = rtc.now();
-  int temp = round(dht.readTemperature());
+
+   if (millis() - main_timer > 1000) {
+    tmp = dht.readTemperature();
+    hum = dht.readHumidity();
+  }
+
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(tmp)  ) {
+    temperature = "--";
+  } else {
+    temperature = round(tmp) + "^C";
+  }
+
+  if (isnan(hum)) {
+  humidity = "--";
+} else {
+  humidity = round(hum) + "%";
+  }
+
   display.clearDisplay();
 
   display.drawRoundRect(0, 0, 127, 63, 5, WHITE);
@@ -84,7 +103,9 @@ void loop() {
 
   display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setCursor(10, 40);            // Start at top-left corner
-  display.println(String(temp));
+  display.println(temperature);
+  display.setCursor(10, 55);            // Start at top-left corner
+  display.println(humidity);
 
   display.display();
   delay(500);
@@ -99,8 +120,12 @@ void loop() {
 
   display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setCursor(10, 40);            // Start at top-left corner
-  display.println(String(temp));
+  display.println(temperature);
+  display.setCursor(10, 55);            // Start at top-left corner
+  display.println(humidity);
 
   display.display();
   delay(500);
+
+   main_timer = millis();    // сбросить таймер
 }
