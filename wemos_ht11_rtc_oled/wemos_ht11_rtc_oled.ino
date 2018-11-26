@@ -35,16 +35,18 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 // tweak the timings for faster processors.  This parameter is no longer needed
 // as the current DHT reading algorithm adjusts itself to work on faster procs.
 DHT dht(DHTPIN, DHTTYPE);
-float hum = 0;
-float tmp = 0;
+//float hum = 0;
+//float tmp = 0;
 String temperature = "--";
 String humidity = "--";
 
 #include "RTClib.h"
 RTC_DS1307 rtc;
-char daysOfTheWeek[7][40] = {"Воскресенье", "Monday", "Tuesday", "Wednesday", "Thursday", "ПЯТНИЦА", "Saturday"};
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-unsigned long main_timer; 
+
+uint16_t tmp_timer;
+uint16_t hum_timer;
 
 void setup() {
   Serial.begin(9600);
@@ -61,71 +63,95 @@ void setup() {
     while (1);
   }
 
-  //if (! rtc.isrunning()) {
-   // Serial.println("RTC is NOT running!");
+  if (! rtc.isrunning()) {
+    // Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-   // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     // This line sets the RTC with an explicit date & time, for example to set
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-  //}
+  }
 }
 
 void loop() {
   DateTime now = rtc.now();
+  String t = getTemperature();
+  String h = getHumidity();
+  draw(now, ":", t, h);
+  delay(500);
+  draw(now, " ", t, h);
+  delay(500);
 
-   if (millis() - main_timer > 1000) {
-    tmp = dht.readTemperature();
-    hum = dht.readHumidity();
-  }
+}
 
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(tmp)  ) {
-    temperature = "--";
-  } else {
-    temperature = round(tmp) + "^C";
-  }
 
-  if (isnan(hum)) {
-  humidity = "--";
-} else {
-  humidity = round(hum) + "%";
-  }
-
+/**
+   Update OLED display
+*/
+void draw(DateTime now, String delim, String temperature, String humidity) {
   display.clearDisplay();
-
+  // draw UI
+  display.drawRoundRect(0, 0, 127, 15, 5, WHITE);
   display.drawRoundRect(0, 0, 127, 63, 5, WHITE);
+  display.drawLine(0, 40, 127, 40, WHITE);
+
+  display.setTextSize(1);             // Normal 1:1 pixel scale
+  display.setCursor(5, 4);
+
+  display.println(String(now.day(), DEC) + "." + String(now.month(), DEC) + "." + String(now.year(), DEC) + "  " + daysOfTheWeek[now.dayOfTheWeek()]);
+
+  char min[5];
+
+  display.setTextSize(1);             // Normal 1:1 pixel scale
+  display.setCursor(90, 28);
+  sprintf(min, ":%02d", now.second());
+  display.println(min);
 
   display.setTextSize(2);             // Normal 1:1 pixel scale
   display.setTextColor(WHITE);        // Draw white text
-  display.setCursor(10, 10);            // Start at top-left corner
-  display.println(String(now.hour()) + ":" + String(now.minute()));
+  display.setCursor(25, 20);            // Start at top-left corner
+  sprintf(min, "%02d:%02d",now.hour(), now.minute());
+  display.println(min);
+
+
 
   display.setTextSize(1);             // Normal 1:1 pixel scale
-  display.setCursor(10, 40);            // Start at top-left corner
-  display.println(temperature);
-  display.setCursor(10, 55);            // Start at top-left corner
-  display.println(humidity);
+  display.setCursor(5, 50);            // Start at top-left corner
+  display.println("T: " + temperature);
+  display.setCursor(70, 50);            // Start at top-left corner
+  display.println("H: " + humidity);
 
   display.display();
-  delay(500);
-  display.clearDisplay();
+}
 
-  display.drawRoundRect(0, 0, 127, 63, 5, WHITE);
+/**
+   Get Temperature
+*/
+String getTemperature() {
+  if (millis() - tmp_timer > 2000 || temperature == "--") {
+    int16_t tmp = ceil(dht.readTemperature());
 
-  display.setTextSize(2);             // Normal 1:1 pixel scale
-  display.setTextColor(WHITE);        // Draw white text
-  display.setCursor(10, 10);            // Start at top-left corner
-  display.println(String(now.hour()) + " " + String(now.minute()));
+    if (isnan(tmp) || tmp <= 0  ) {
+      return temperature;
+    }
+    tmp_timer = millis();    // сбросить таймер
+    return String(tmp) + F("C");
+  }
+  return temperature;
+}
 
-  display.setTextSize(1);             // Normal 1:1 pixel scale
-  display.setCursor(10, 40);            // Start at top-left corner
-  display.println(temperature);
-  display.setCursor(10, 55);            // Start at top-left corner
-  display.println(humidity);
+/**
+   Get Humidity
+*/
+String getHumidity() {
+  if (millis() - hum_timer > 2000 || humidity == "--") {
+    int16_t hum = ceil(dht.readHumidity());
 
-  display.display();
-  delay(500);
-
-   main_timer = millis();    // сбросить таймер
+    if (isnan(hum) || hum <= 0 ) {
+      return humidity;
+    }
+    hum_timer = millis();    // сбросить таймер
+    return String(hum) + F("%");
+  }
+  return humidity;
 }
