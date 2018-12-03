@@ -104,13 +104,13 @@ void draw(DateTime now, String delim, String temperature, String humidity) {
 
   display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setCursor(90, 28);
-  sprintf(min, ":%02d", now.second());
-  display.println(min);
+  sprintf(min, "%02d", now.second());
+  display.println(delim + min);
 
   display.setTextSize(2);             // Normal 1:1 pixel scale
   display.setTextColor(WHITE);        // Draw white text
   display.setCursor(25, 20);            // Start at top-left corner
-  sprintf(min, "%02d:%02d",now.hour(), now.minute());
+  sprintf(min, "%02d%s%02d", now.hour(), delim.c_str(), now.minute());
   display.println(min);
 
 
