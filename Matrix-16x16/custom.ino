@@ -62,70 +62,44 @@
 //  break;
 
 // не забудьте указать количество режимов для корректного переключения с последнего на первый
-#define MODES_AMOUNT 9   // количество кастомных режимов (которые переключаются сами или кнопкой)
+#define MODES_AMOUNT 4   // количество кастомных режимов (которые переключаются сами или кнопкой)
 
 void customModes() {
   switch (thisMode) {
 
-    case 0:
-
-      fillString("С НОВЫМ ГОДОМ 2019! ПРОГРАММИРУЕМ АРДУИНО", 2);
-      break;
-    case 1:
-      snowRoutine();
-
-      //fillString("РАДУГА", 1);
-      break;
-    case 2:
+    case 0: //fillString("КРАСНЫЙ", CRGB::Red);
       matrixRoutine();
-      //fillString("RGB LED", 2);
       break;
-    case 3:
+    case 1: //fillString("РАДУГА", 1);
+      snowRoutine();
+      break;
+    case 2: //fillString("RGB LED", 2);
       fireRoutine();
-      //madnessNoise();
       break;
-    case 4:
-      snakeRoutine();
-      //cloudNoise();
+    case 3: //madnessNoise();
+      clockRoutine();
       break;
-    case 5:
-      starfallRoutine();
-      //lavaNoise();
+    case 4: cloudNoise();
       break;
-    case 6:
-      arkanoidRoutine();
-
-      // mazeRoutine();
-      //plasmaNoise();
+    case 5: lavaNoise();
       break;
-    case 7:
-      ballsRoutine();
-      // runnerRoutine();
-      //rainbowNoise();
+    case 6: plasmaNoise();
       break;
-    case 8:
-      sparklesRoutine();
-      //  flappyRoutine();
-
-      //rainbowStripeNoise();
+    case 7: rainbowNoise();
       break;
-    case 9: //zebraNoise();
-
+    case 8: rainbowStripeNoise();
       break;
-    case 10: //forestNoise();
-
-      // clockRoutine();
+    case 9: zebraNoise();
       break;
-    case 11: //oceanNoise();
-
+    case 10: forestNoise();
       break;
-
-
-    case 12:
+    case 11: oceanNoise();
+      break;
+    case 12: snowRoutine();
       break;
     case 13: sparklesRoutine();
       break;
-    case 14:
+    case 14: matrixRoutine();
       break;
     case 15: starfallRoutine();
       break;
@@ -137,21 +111,21 @@ void customModes() {
       break;
     case 19: rainbowDiagonalRoutine();
       break;
-    case 20:
+    case 20: fireRoutine();
       break;
-    case 21:
+    case 21: snakeRoutine();
       break;
-    case 22:
+    case 22: tetrisRoutine();
       break;
-    case 23:
+    case 23: mazeRoutine();
       break;
-    case 24:
+    case 24: runnerRoutine();
       break;
-    case 25:
+    case 25: flappyRoutine();
       break;
-    case 26:
+    case 26: arkanoidRoutine();
       break;
-    case 27:
+    case 27: clockRoutine();
       break;
 
 
@@ -201,8 +175,8 @@ timerMinim gifTimer(D_GIF_SPEED);
     }
   }
   }
-
 */
+
 // ********************* ОСНОВНОЙ ЦИКЛ РЕЖИМОВ *******************
 #if (SMOOTH_CHANGE == 1)
 byte fadeMode = 4;
