@@ -30,7 +30,7 @@ int spacer = 1;
 int width = 5 + spacer; // The font width is 5 pixels
 
 void setup() {
- // Serial.begin(9600);
+  // Serial.begin(9600);
 
   if (!htu.begin()) {
     Serial.println("Couldn't find sensor!");
@@ -76,12 +76,20 @@ void loop() {
   DateTime now = rtc.now();
   //dt = clock.getDateTime();
   if (now.second() % 2) {
-    tape = (String) now.hour() + ":" + now.minute() + " " +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
+    tape = printDigits(now.hour())
+           + ":"
+           + printDigits(now.minute())
+           + " "
+           +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
   } else {
-    tape = (String) now.hour() + " " + now.minute() + " " +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
+    tape = printDigits(now.hour())
+           + " "
+           + printDigits(now.minute())
+           + " "
+           +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
   }
 
- // Serial.println(tape);
+  // Serial.println(tape);
   /*
     if (dt.minute % 2) {
     matrix.fillScreen(LOW);
@@ -199,4 +207,13 @@ String utf8rus(String source)
     m[0] = n; target = target + String(m);
   }
   return target;
+}
+String printDigits(int digits)
+{
+  // utility function for digital clock display: prints preceding colon and leading 0
+
+  if (digits < 10) {
+    return "0" + digits;
+  }
+  return (String) digits;
 }
