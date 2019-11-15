@@ -75,19 +75,24 @@ void loop() {
 
   DateTime now = rtc.now();
   //dt = clock.getDateTime();
-  if (now.second() % 2) {
-    tape = printDigits(now.hour())
-           + ":"
-           + printDigits(now.minute())
-           + " "
-           +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
-  } else {
-    tape = printDigits(now.hour())
-           + " "
-           + printDigits(now.minute())
-           + " "
-           +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
-  }
+
+  // if (now.second() % 2) {
+
+  tape = printDigits(now.hour())
+         + ":"
+         + printDigits(now.minute())
+         + " "
+         +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
+  DisplayText(tape);
+  delay(500);
+
+  // } else {
+  tape = printDigits(now.hour())
+         + " "
+         + printDigits(now.minute())
+         + " "
+         +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
+  //}
 
   // Serial.println(tape);
   /*
@@ -101,7 +106,7 @@ void loop() {
   */
 
   DisplayText(tape);
-
+  delay(500);
 
   /*
     int i = width * tape.length() - width;//width * tape.length() + matrix.width() - 1 - spacer;
@@ -128,7 +133,7 @@ void loop() {
 
     matrix.write(); // Send bitmap to display
   */
-  delay(900);
+
 }
 
 // =======================================================================
@@ -213,7 +218,7 @@ String printDigits(int digits)
   // utility function for digital clock display: prints preceding colon and leading 0
 
   if (digits < 10) {
-    return "0" + digits;
+    return "0" + (String)digits;
   }
   return (String) digits;
 }

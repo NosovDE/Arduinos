@@ -62,68 +62,42 @@
 //  break;
 
 // не забудьте указать количество режимов для корректного переключения с последнего на первый
-#define MODES_AMOUNT 4   // количество кастомных режимов (которые переключаются сами или кнопкой)
+#define MODES_AMOUNT 1   // количество кастомных режимов (которые переключаются сами или кнопкой)
 
 void customModes() {
   switch (thisMode) {
 
-    case 0:
-      fillString("КОММЕРЧЕСКАЯ РАЗРАБОТКА ПОД КЛЮЧ", 2);
+    case 0: 
+    fireRoutine();
+    //fillString("КРАСНЫЙ", CRGB::Red);
       break;
-    case 1:
-      snowRoutine();
-      //fillString("РАДУГА", 1);
+    case 1: fillString("РАДУГА", 1);
       break;
-    case 2:
-      matrixRoutine();
-      //fillString("RGB LED", 2);
+    case 2: fillString("RGB LED", 2);
       break;
-    case 3:
-      fireRoutine();
-      //madnessNoise();
+    case 3: madnessNoise();
       break;
-    case 4:
-//      snakeRoutine();
-      //cloudNoise();
+    case 4: cloudNoise();
       break;
-    case 5:
-  //    starfallRoutine();
-      //lavaNoise();
+    case 5: lavaNoise();
       break;
-    case 6:
- //     arkanoidRoutine();
-
-      // mazeRoutine();
-      //plasmaNoise();
+    case 6: plasmaNoise();
       break;
-    case 7:
-   //   ballsRoutine();
-      // runnerRoutine();
-      //rainbowNoise();
+    case 7: rainbowNoise();
       break;
-    case 8:
-     // sparklesRoutine();
-      //  flappyRoutine();
-
-      //rainbowStripeNoise();
+    case 8: rainbowStripeNoise();
       break;
-    case 9: //zebraNoise();
-
+    case 9: zebraNoise();
       break;
-    case 10: //forestNoise();
-
-      // clockRoutine();
+    case 10: forestNoise();
       break;
-    case 11: //oceanNoise();
-
+    case 11: oceanNoise();
       break;
-
-
-    case 12:
+    case 12: snowRoutine();
       break;
     case 13: sparklesRoutine();
       break;
-    case 14:
+    case 14: matrixRoutine();
       break;
     case 15: starfallRoutine();
       break;
@@ -135,21 +109,21 @@ void customModes() {
       break;
     case 19: rainbowDiagonalRoutine();
       break;
-    case 20:
+    case 20: fireRoutine();
       break;
-    case 21:
+    case 21: snakeRoutine();
       break;
-    case 22:
+    case 22: tetrisRoutine();
       break;
-    case 23:
+    case 23: mazeRoutine();
       break;
-    case 24:
+    case 24: runnerRoutine();
       break;
-    case 25:
+    case 25: flappyRoutine();
       break;
-    case 26:
+    case 26: arkanoidRoutine();
       break;
-    case 27:
+    case 27: clockRoutine();
       break;
 
 
@@ -199,8 +173,8 @@ timerMinim gifTimer(D_GIF_SPEED);
     }
   }
   }
-
 */
+
 // ********************* ОСНОВНОЙ ЦИКЛ РЕЖИМОВ *******************
 #if (SMOOTH_CHANGE == 1)
 byte fadeMode = 4;
@@ -277,17 +251,21 @@ void customRoutine() {
     if (!gamemodeFlag) {
       if (effectTimer.isReady()) {
 #if (OVERLAY_CLOCK == 1 && USE_CLOCK == 1)
-        if (!loadingFlag && !gamemodeFlag && needUnwrap() && modeCode != 0) clockOverlayUnwrap(CLOCK_X, CLOCK_Y);
-        if (loadingFlag) loadFlag2 = true;
+        if (overlayAllowed()) {
+          if (!loadingFlag && !gamemodeFlag && needUnwrap() && modeCode != 0) clockOverlayUnwrap(CLOCK_X, CLOCK_Y);
+          if (loadingFlag) loadFlag2 = true;
+        }
 #endif
 
         customModes();                // режимы крутятся, пиксели мутятся
 
 #if (OVERLAY_CLOCK == 1 && USE_CLOCK == 1)
-        if (!gamemodeFlag && modeCode != 0) clockOverlayWrap(CLOCK_X, CLOCK_Y);
-        if (loadFlag2) {
-          setOverlayColors();
-          loadFlag2 = false;
+        if (overlayAllowed()) {
+          if (!gamemodeFlag && modeCode != 0) clockOverlayWrap(CLOCK_X, CLOCK_Y);
+          if (loadFlag2) {
+            setOverlayColors();
+            loadFlag2 = false;
+          }
         }
 #endif
         loadingFlag = false;
