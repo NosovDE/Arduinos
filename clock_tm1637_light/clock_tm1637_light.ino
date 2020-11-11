@@ -75,6 +75,8 @@ RTC_DS3231 rtc;
 
 boolean dotFlag, alarmFlag, minuteFlag, blinkFlag, newTimeFlag;
 int8_t hrs = 21, mins = 55, secs;
+int8_t hrs2 = 0, mins2 = 00, secs2;
+
 int8_t alm_hrs, alm_mins;
 int8_t dwn_hrs, dwn_mins;
 byte mode;  // 0 - часы, 1 - уст. будильника, 2 - уст. времени
@@ -99,9 +101,11 @@ void setup() {
   disp.clear();
 
   rtc.begin();
-  if (rtc.lostPower()) {
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
+  //if (rtc.lostPower()) {
+  //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    rtc.adjust(DateTime(F(__DATE__), F("00:00")));
+  
+  //}
   DateTime now = rtc.now();
   secs = now.second();
   mins = now.minute();
@@ -134,7 +138,10 @@ void loop() {
     // выводим время
     if (CLOCK_EFFECT == 0) disp.displayClock(hrs, mins);
     else if (CLOCK_EFFECT == 1) disp.displayClockScroll(hrs, mins, 70);
-    else disp.displayClockTwist(hrs, mins, 35);
+    else {
+      //disp.displayClockTwist(hrs2++, mins2++, 35);
+      disp.displayClockTwist(hrs, mins, 35);
+    }
   }
 }
 
