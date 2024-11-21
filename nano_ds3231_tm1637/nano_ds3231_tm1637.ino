@@ -4,8 +4,8 @@
    AlexGyver Technologies http://alexgyver.ru/
 */
 
-#define CLK 2
-#define DIO 3
+#define CLK 12
+#define DIO 11
 
 #include "GyverTM1637.h"
 GyverTM1637 disp(CLK, DIO);
@@ -27,7 +27,7 @@ void setup() {
   // rtc.setTime(20, 54, 0);     // Set the time to 12:00:00 (24hr format)
   //rtc.setDate(23, 11, 2018);   // Set the date to January 1st, 2014
   // rtc.adjust(DateTime(2018, 23, 11, 21, 55, 0));
-
+ rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
   // Serial.begin(9600);
   disp.clear();

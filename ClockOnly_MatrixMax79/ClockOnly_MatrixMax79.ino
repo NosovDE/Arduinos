@@ -16,7 +16,7 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 int pinCS = 10; // Attach CS to this pin, DIN to MOSI(11) and CLK to SCK(13) (cf http://arduino.cc/en/Reference/SPI )
 int numberOfHorizontalDisplays = 1;
-int numberOfVerticalDisplays = 8; // Кол-во сегментов
+int numberOfVerticalDisplays = 4; // Кол-во сегментов
 
 Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
 
@@ -32,14 +32,9 @@ int width = 5 + spacer; // The font width is 5 pixels
 void setup() {
    Serial.begin(9600);
 
-  if (!htu.begin()) {
-    Serial.println("Couldn't find sensor!");
-    while (1);
-  }
-
   if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
+  //  Serial.println("Couldn't find RTC");
+  //  while (1);
   }
 
   if (rtc.lostPower()) {
@@ -51,12 +46,13 @@ void setup() {
     // rtc.adjust(DateTime(2022, 3, 22, 15, 52, 0));
   }
   //clock.begin();
-rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//rtc.adjust(DateTime(2022, 3, 22, 15, 52, 0));
   // Set sketch compiling time
 //  clock.setDateTime(__DATE__, __TIME__);
   //clock.setDateTime("2017-12-10", "18:24");
 
-  matrix.setIntensity(1); // Use a value between 0 and 15 for brightness
+  matrix.setIntensity(4); // Use a value between 0 and 15 for brightness
 
   // Adjust to your own needs
   //  matrix.setPosition(0, 0, 0); // The first display is at <0, 0>
@@ -70,31 +66,23 @@ rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
 void loop() {
 
-  int temp = htu.readTemperature();
-  int hum = htu.readHumidity();
-
+ 
   DateTime now = rtc.now();
-  //dt = clock.getDateTime();
-
-  // if (now.second() % 2) {
-
+ 
   tape = printDigits(now.hour())
          + ":"
          + printDigits(now.minute())
-         + " "
-         +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
+         + " ";
   DisplayText(tape);
   delay(500);
 
-  // } else {
+
   tape = printDigits(now.hour())
          + " "
          + printDigits(now.minute())
-         + " "
-         +  (now.second() % 15 > 7 ?  (String)temp + "C " :  (String)hum + "% ") ;
-  //}
-
-  // Serial.println(tape);
+         + " " ;
+  
+   Serial.println(tape);
   /*
     if (dt.minute % 2) {
     matrix.fillScreen(LOW);
