@@ -52,7 +52,7 @@ void setup() {
 //  clock.setDateTime(__DATE__, __TIME__);
   //clock.setDateTime("2017-12-10", "18:24");
 
-  matrix.setIntensity(4); // Use a value between 0 and 15 for brightness
+  matrix.setIntensity(15); // Use a value between 0 and 15 for brightness
 
   // Adjust to your own needs
   //  matrix.setPosition(0, 0, 0); // The first display is at <0, 0>

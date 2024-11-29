@@ -1,14 +1,22 @@
+#include <Wire.h>
+//#include <OLED_I2C.h>         // Подключение библиотеки для дисплея
+//#include "DS3231.h"
 
-#include <OLED_I2C.h>         // Подключение библиотеки для дисплея
+#include <GyverOLED.h>
 
-#include <DS3231.h>
 
+
+//#define SDA  4
+//#define SCL  5
 
 OLED  myOLED(SDA, SCL, 8);
 extern uint8_t MegaNumbers[]; // Подключение больших шрифтов
 extern uint8_t SmallFont[];   // Подключение маленьких шрифтов
-//#include <DS1307.h>           // Подключение библиотеки для часового модуля
-DS3231 rtc(SDA, SCL);
+
+ 
+DS3231 rtc;
+RTCDateTime dt;
+
 void setup() {
   myOLED.begin();
   rtc.begin();
@@ -20,18 +28,24 @@ void setup() {
 }
 void loop() {
   myOLED.setFont(SmallFont);
-  myOLED.print(rtc.getDOWStr(), CENTER, 0);   // Отображение дня недели
-  String stringOne = rtc.getTimeStr();
+  myOLED.print(rtc.dateFormat("w", dt), CENTER, 0);   // Отображение дня недели
+    // 
+  String stringOne = rtc.dateFormat("H:i:s", dt);
   myOLED.setFont(MegaNumbers);
   myOLED.print(stringOne.substring(0, 2), 4, 12);  // Отображение часов
   myOLED.print("/", 51, 12);                       // Отображение двоеточия
   myOLED.print(stringOne.substring(3, 5), 75, 12); // Отображение минут
   myOLED.setFont(SmallFont);
-  myOLED.print(rtc.getDateStr(), CENTER, 57);      // Отображение даты
+
+  String date = rtc.dateFormat("d-m-Y", dt);
+  myOLED.print(date, CENTER, 57);      // Отображение даты
   myOLED.update();
+ 
   delay(500);
+  
   myOLED.setFont(MegaNumbers);                     // Скрытие двоеточия
   myOLED.print("-", 51, 12);
   myOLED.update();
+  
   delay(500);
 }
