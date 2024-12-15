@@ -31,10 +31,15 @@ MicroDS3231 rtc;
 GyverBME280 bme;
 
 
+int counter = 0;      // замена i
+uint32_t timer = 0;   // переменная таймера
+#define T_PERIOD 500  // период переключения
+
+
 
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   if (rtc.lostPower()) {  //  при потере питания
     rtc.setTime(COMPILE_TIME);  // установить время компиляции
@@ -68,7 +73,8 @@ void setup() {
   //  matrix.setRotation(0, 2);    // The first display is position upside down
   matrix.setRotation(1);    // The same hold for the last display
 
-
+  // matrix.fillScreen(0);
+  DisplayText("__:__WAIT ");
 
   bme.setMode(FORCED_MODE);                             // Перед инициализацией говорим датчику работать в принудительном режиме
   bme.begin();                                          // Больше настройки не нужны  - инициализируем датчик
@@ -77,49 +83,42 @@ void setup() {
     bme.oneMeasurement();                               // Просим датчик проснуться и сделать одно преобразование
     while (bme.isMeasuring());                          // Ждем окончания преобразования
 
-    Serial.print("Temperature: ");
-    Serial.print(bme.readTemperature());                // Читаем и выводим температуру
-    Serial.println(" *C");
+  //  Serial.print("Temperature: ");
+  //  Serial.print(bme.readTemperature());                // Читаем и выводим температуру
+  //  Serial.println(" *C");
 
-    Serial.print("Humidity: ");
-    Serial.print(bme.readHumidity());                   // Читаем и выводим влажность
-    Serial.println(" %");
+  //  Serial.print("Humidity: ");
+  //  Serial.print(bme.readHumidity());                   // Читаем и выводим влажность
+ //   Serial.println(" %");
 
-    Serial.print("Pressure: ");
-    Serial.print(pressureToMmHg(bme.readPressure()));   // Читаем и выводим давление
-    Serial.println(" mm Hg");
-    Serial.println("");
+  //  Serial.print("Pressure: ");
+  //  Serial.print(pressureToMmHg(bme.readPressure()));   // Читаем и выводим давление
+  //  Serial.println(" mm Hg");
+ //   Serial.println("");
     delay(1000);
   }
 
   bme.setMode(NORMAL_MODE);                             // Спустя 10 секунд переключаем датчик в обычный режим
   bme.begin();                                          // Переинициализируем датчик после изменения настроек - обязательная процедура
 
-
-
+ //matrix.fillScreen(1);
 }
 
 void loop() {
+  if (millis() - timer >= T_PERIOD) { // таймер на millis()
+    timer = millis(); // сброс
 
-  // получаем все данные в структуру
-  DateTime now = rtc.getTime();
+    // получаем все данные в структуру
+    DateTime now = rtc.getTime();
 
-  tape = printDigits(now.hour)
-         + ":"
-         + printDigits(now.minute)
-         //+ " "
-         +  getExtraInfo(now);
+    tape = (String)now.hour
+           + (now.second % 2 ? ":" : " ")
+           + (String)(now.minute)
 
-  DisplayText(tape);
+           +  getExtraInfo(now);
 
-  Serial.println(tape);
-  delay(500);
-
-  tape = printDigits(now.hour)
-         + " "
-         + printDigits(now.minute)
-         //+ " "
-         +  getExtraInfo(now);
+    DisplayText(tape);
+  }
 
 
   /*
@@ -132,9 +131,7 @@ void loop() {
     }
   */
 
-  DisplayText(tape);
-  Serial.println(tape);
-  delay(500);
+
 
   /*
     int i = width * tape.length() - width;//width * tape.length() + matrix.width() - 1 - spacer;
@@ -165,9 +162,11 @@ void loop() {
 }
 
 String getExtraInfo(DateTime now) {
-  if (now.second > 0 && now.second < 20)  {
+  int8_t period = now.second % 15;
+
+  if (period >= 0 && period < 5)  {
     return  (String)(int)bme.readTemperature() + "C  ";
-  } else if (now.second >= 20 && now.second < 40)  {
+  } else if (period >= 5 && period < 10)  {
     return  (String)(int)bme.readHumidity() + "%  ";
   }
   return  (String)(int)pressureToMmHg(bme.readPressure()) + "mm  ";
