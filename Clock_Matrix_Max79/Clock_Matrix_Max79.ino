@@ -51,7 +51,7 @@ void setup() {
     // rtc.adjust(DateTime(2022, 3, 22, 15, 52, 0));
   }
   //clock.begin();
-rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   // Set sketch compiling time
 //  clock.setDateTime(__DATE__, __TIME__);
   //clock.setDateTime("2017-12-10", "18:24");

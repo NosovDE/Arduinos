@@ -1,22 +1,14 @@
+
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Max72xxPanel.h>
 #include <Wire.h>
-//#include <DS3231.h>
-#include <Adafruit_HTU21DF.h>
 
-#include "RTClib.h"
-
-RTC_DS3231 rtc;
-//DS3231 clock;
-//RTCDateTime dt;
-//RTClib RTC;
-Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 
 int pinCS = 10; // Attach CS to this pin, DIN to MOSI(11) and CLK to SCK(13) (cf http://arduino.cc/en/Reference/SPI )
 int numberOfHorizontalDisplays = 1;
-int numberOfVerticalDisplays = 4; // Кол-во сегментов
+int numberOfVerticalDisplays = 8; // Кол-во сегментов
 
 Max72xxPanel matrix = Max72xxPanel(pinCS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
 
@@ -29,13 +21,27 @@ int wait = 90; // In milliseconds
 int spacer = 1;
 int width = 5 + spacer; // The font width is 5 pixels
 
-void setup() {
-   //Serial.begin(9600);
+#include "microDS3231.h"
+MicroDS3231 rtc;
 
-  if (! rtc.begin()) {
-  //  Serial.println("Couldn't find RTC");
-  //  while (1);
+
+
+
+#include "GyverBME280.h"
+GyverBME280 bme;
+
+
+
+
+void setup() {
+  Serial.begin(9600);
+
+  if (rtc.lostPower()) {  //  при потере питания
+    rtc.setTime(COMPILE_TIME);  // установить время компиляции
   }
+
+  //rtc.setTime(SEC, MIN, HOUR, DAY, MONTH, YEAR); // устанвока времени вручную
+
 
   if (rtc.lostPower()) {
     Serial.println("RTC lost power, lets set the time!");
@@ -46,10 +52,9 @@ void setup() {
     // rtc.adjust(DateTime(2022, 3, 22, 15, 52, 0));
   }
   //clock.begin();
-//rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-//rtc.adjust(DateTime(2022, 3, 22, 15, 52, 0));
+  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   // Set sketch compiling time
-//  clock.setDateTime(__DATE__, __TIME__);
+  //  clock.setDateTime(__DATE__, __TIME__);
   //clock.setDateTime("2017-12-10", "18:24");
 
   matrix.setIntensity(1); // Use a value between 0 and 15 for brightness
@@ -62,27 +67,61 @@ void setup() {
   //  ...
   //  matrix.setRotation(0, 2);    // The first display is position upside down
   matrix.setRotation(1);    // The same hold for the last display
+
+
+
+  bme.setMode(FORCED_MODE);                             // Перед инициализацией говорим датчику работать в принудительном режиме
+  bme.begin();                                          // Больше настройки не нужны  - инициализируем датчик
+
+  while (millis() < 10000) {                            // Работа с датчиком в принудительном режиме в течении первых 10 секунд
+    bme.oneMeasurement();                               // Просим датчик проснуться и сделать одно преобразование
+    while (bme.isMeasuring());                          // Ждем окончания преобразования
+
+    Serial.print("Temperature: ");
+    Serial.print(bme.readTemperature());                // Читаем и выводим температуру
+    Serial.println(" *C");
+
+    Serial.print("Humidity: ");
+    Serial.print(bme.readHumidity());                   // Читаем и выводим влажность
+    Serial.println(" %");
+
+    Serial.print("Pressure: ");
+    Serial.print(pressureToMmHg(bme.readPressure()));   // Читаем и выводим давление
+    Serial.println(" mm Hg");
+    Serial.println("");
+    delay(1000);
+  }
+
+  bme.setMode(NORMAL_MODE);                             // Спустя 10 секунд переключаем датчик в обычный режим
+  bme.begin();                                          // Переинициализируем датчик после изменения настроек - обязательная процедура
+
+
+
 }
 
 void loop() {
 
- 
-  DateTime now = rtc.now();
- 
-  tape = printDigits(now.hour())
+  // получаем все данные в структуру
+  DateTime now = rtc.getTime();
+
+  tape = printDigits(now.hour)
          + ":"
-         + printDigits(now.minute())
-         + " ";
+         + printDigits(now.minute)
+         //+ " "
+         +  getExtraInfo(now);
+
   DisplayText(tape);
+
+  Serial.println(tape);
   delay(500);
 
-
-  tape = printDigits(now.hour())
+  tape = printDigits(now.hour)
          + " "
-         + printDigits(now.minute())
-         + " " ;
-  
-   Serial.println(tape);
+         + printDigits(now.minute)
+         //+ " "
+         +  getExtraInfo(now);
+
+
   /*
     if (dt.minute % 2) {
     matrix.fillScreen(LOW);
@@ -94,6 +133,7 @@ void loop() {
   */
 
   DisplayText(tape);
+  Serial.println(tape);
   delay(500);
 
   /*
@@ -124,6 +164,15 @@ void loop() {
 
 }
 
+String getExtraInfo(DateTime now) {
+  if (now.second > 0 && now.second < 20)  {
+    return  (String)(int)bme.readTemperature() + "C  ";
+  } else if (now.second >= 20 && now.second < 40)  {
+    return  (String)(int)bme.readHumidity() + "%  ";
+  }
+  return  (String)(int)pressureToMmHg(bme.readPressure()) + "mm  ";
+}
+
 // =======================================================================
 void ScrollText (String text) {
 
@@ -152,9 +201,10 @@ void DisplayText(String text) {
 
   for (int i = 0; i < text.length(); i++) {
 
-    int letter = (matrix.width()) - i * (width );
+    int letter = (matrix.width()) - i * (width);
     int x = (matrix.width() + 1) - letter;
     int y = (matrix.height() - 8) / 2; // Центрируем текст по Вертикали
+    if (i > 4) x = x + 3;
     matrix.drawChar(x, y, text[i], HIGH, LOW, 1);
 
     matrix.write(); // Вывод на дисплей
@@ -201,6 +251,7 @@ String utf8rus(String source)
   }
   return target;
 }
+
 String printDigits(int digits)
 {
   // utility function for digital clock display: prints preceding colon and leading 0

@@ -16,8 +16,8 @@ MAX7219<6, 1, 10, 11, 13> mtrx;
 struct Data {
   bool state = 0;
   int8_t vol = 10;
-  int8_t bright_eyes = 1;
-  int8_t bright_mouth = 8;
+  int8_t bright_eyes = 10;
+  int8_t bright_mouth = 3;
   uint16_t trsh = 50;
   uint8_t mode = 0;
   int8_t station = 0;
@@ -138,23 +138,48 @@ void loop(void) {
   mtrx.clear();
   mtrx.update();
 
+
   for (int i = 0; i < 100; i++) {
+    draw_eye(0);
+    draw_eye(1);
+    draw_eyeb(0, 3, 3);
+    draw_eyeb(1, 3, 3);
+    for (int i = 0; i < 10; i++) {
+      static uint16_t pos;
+      pos += 15;
+      uint8_t x = inoise8(pos);
+      uint8_t y = inoise8(pos + UINT16_MAX / 4);
+      x = constrain(x, 40, 255 - 40);
+      y = constrain(y, 40, 255 - 40);
+      x = map(x, 40, 255 - 40, 2, 5);
+      y = map(y, 40, 255 - 40, 2, 5);
+      if (pulse) {
+        pulse = 0;
+        int8_t sx = random(-1, 1);
+        int8_t sy = random(-1, 1);
+        draw_eyeb(0, x + sx, y + sy, 3);
+        draw_eyeb(1, x + sx, y + sy, 3);
+      } else {
+        draw_eyeb(0, x, y);
+        draw_eyeb(1, x, y);
+      }
+    }
+
     analyz0(random(128));
     mtrx.update();
     delay(50);
     mtrx.clear();
   }
-
-  for (int i = 0; i < 100; i++) {
-    analyz1(random(128));
+  /*
+    for (int i = 0; i < 100; i++) {
+      analyz1(random(128));
+      mtrx.update();
+      delay(50);
+      mtrx.clear();
+    }
     mtrx.update();
-    delay(50);
-    mtrx.clear();
-  }
-  // analyz1(10);
-  mtrx.update();
-  delay(1000);
-
+    delay(1000);
+  */
   //draw_eye(0);
   // for (int i = 0; i < 10; i++) {
   // anim_search();
@@ -162,8 +187,8 @@ void loop(void) {
 
   //  delay(400);
   // }
-  mtrx.clear();
-  mtrx.update();
+  // mtrx.clear();
+  // mtrx.update();
 
 
   draw_eye(0);
@@ -174,6 +199,7 @@ void loop(void) {
   mtrx.lineH(1, ANALYZ_WIDTH + 5, ANALYZ_WIDTH + 5 + 6 - 1, GFX_CLEAR);
   mtrx.lineH(2, ANALYZ_WIDTH + 6, ANALYZ_WIDTH + 6 + 4 - 1, GFX_CLEAR);
   mtrx.lineH(3, ANALYZ_WIDTH + 7, ANALYZ_WIDTH + 7 + 2 - 1, GFX_CLEAR);
+  analyz0(random(128));
   mtrx.update();
   delay(3000);
 
@@ -209,17 +235,11 @@ void loop(void) {
 
   delay(2000);
 
-  print_val('v', data.vol);
+  // print_val('v', data.vol);
 
-  mtrx.update();
+  // mtrx.update();
 
-  mtrx.lineH(0, ANALYZ_WIDTH, ANALYZ_WIDTH + 16 - 1, GFX_CLEAR);
-  mtrx.lineH(1, ANALYZ_WIDTH + 5, ANALYZ_WIDTH + 5 + 6 - 1, GFX_CLEAR);
-  mtrx.lineH(2, ANALYZ_WIDTH + 6, ANALYZ_WIDTH + 6 + 4 - 1, GFX_CLEAR);
-  mtrx.lineH(3, ANALYZ_WIDTH + 7, ANALYZ_WIDTH + 7 + 2 - 1, GFX_CLEAR);
-  mtrx.update();
 
-  delay(2000);
 
   draw_eyeb(0, 4, 3, 3);
   draw_eyeb(1, 1, 3, 3);
