@@ -83,25 +83,25 @@ void setup() {
     bme.oneMeasurement();                               // Просим датчик проснуться и сделать одно преобразование
     while (bme.isMeasuring());                          // Ждем окончания преобразования
 
-  //  Serial.print("Temperature: ");
-  //  Serial.print(bme.readTemperature());                // Читаем и выводим температуру
-  //  Serial.println(" *C");
+    //  Serial.print("Temperature: ");
+    //  Serial.print(bme.readTemperature());                // Читаем и выводим температуру
+    //  Serial.println(" *C");
 
-  //  Serial.print("Humidity: ");
-  //  Serial.print(bme.readHumidity());                   // Читаем и выводим влажность
- //   Serial.println(" %");
+    //  Serial.print("Humidity: ");
+    //  Serial.print(bme.readHumidity());                   // Читаем и выводим влажность
+    //   Serial.println(" %");
 
-  //  Serial.print("Pressure: ");
-  //  Serial.print(pressureToMmHg(bme.readPressure()));   // Читаем и выводим давление
-  //  Serial.println(" mm Hg");
- //   Serial.println("");
+    //  Serial.print("Pressure: ");
+    //  Serial.print(pressureToMmHg(bme.readPressure()));   // Читаем и выводим давление
+    //  Serial.println(" mm Hg");
+    //   Serial.println("");
     delay(1000);
   }
 
   bme.setMode(NORMAL_MODE);                             // Спустя 10 секунд переключаем датчик в обычный режим
   bme.begin();                                          // Переинициализируем датчик после изменения настроек - обязательная процедура
 
- //matrix.fillScreen(1);
+  //matrix.fillScreen(1);
 }
 
 void loop() {
