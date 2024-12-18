@@ -1,62 +1,39 @@
-//-------------------------
-// EEPROM
-//-------------------------
-#include "EEManager.h"
-
-struct Settings {
-  uint8_t version = 1;
-  uint8_t intensity = 0;
-};
-Settings settings;  // переменная, с которой мы работаем в программе
-EEManager memory(settings);
 
 //-------------------------
 // Matrix 7219
 //-------------------------
-#include "Adafruit_GFX.h"
-#include "Max72xxPanel.h"
+#include "GyverMAX7219.h"
+#define pinCS 10 // Attach CS to this pin, DIN to MOSI(11) and CLK to SCK(13) (cf http://arduino.cc/en/Reference/SPI )
+MAX7219 < 4, 2, pinCS > matrix;   // одна матрица (1х1), пин CS на D5
 
-#define MAX_CS  10 // CS to this pin
-#define MAX_DIN 11 // DIN to MOSI(11) hardware SPI
-#define MAX_CLK 13 // CLK to SCK(13)  hardware SPI
+int refresh = 0;
+String tape = "21:00";
+const String format1 = "H:i ";
+const String format2 = "H i ";
+int wait = 90; // In milliseconds
 
-int numberOfHorizontalDisplays = 1;
-int numberOfVerticalDisplays = 8; // Кол-во сегментов
-
-Max72xxPanel matrix = Max72xxPanel(MAX_CS, numberOfHorizontalDisplays, numberOfVerticalDisplays);
-
-String tape;
 int spacer = 1;
 int width = 5 + spacer; // The font width is 5 pixels
 
-
-//-------------------------
-// RTC DS3231
-//-------------------------
 #include "microDS3231.h"
 MicroDS3231 rtc;
 DateTime date;
 
 
-//-------------------------
-// Датчик температуры, влажности, давления BME280
-//-------------------------
+
 #include "GyverBME280.h"
 GyverBME280 bme;
 
-//-------------------------
-// Энкодер
-//-------------------------
+
 #define EN_CLK 8
 #define EN_DT 9
 #define EN_SW 7
 
 #include "GyverEncoder.h"
-Encoder enc(EN_CLK, EN_DT, EN_SW, TYPE2); // тип энкодера TYPE1 одношаговый, TYPE2 двухшаговый. Если ваш энкодер работает странно, смените тип
-
-//------------------------
+Encoder enc(EN_CLK, EN_DT, EN_SW, TYPE2);
 
 
+int counter = 0;      // замена i
 uint32_t timer = 0;   // переменная таймера
 #define T_500MLS 500  // период переключения
 boolean isEdit = false;
@@ -65,8 +42,11 @@ boolean isHour = false;
 
 
 void setup() {
-  // Serial.begin(9600);
-  memory.begin(0, 'b');
+  Serial.begin(9600);
+
+  // Энкодер
+  //enc.setType(TYPE2);    // тип энкодера TYPE1 одношаговый, TYPE2 двухшаговый. Если ваш энкодер работает странно, смените тип
+
 
   // Часы DS3032
   if (rtc.lostPower()) {  //  при потере питания
@@ -79,12 +59,13 @@ void setup() {
   // Serial.println("Date: " + rtc.getDateString());
 
   // Матрицы MAX79
-  matrix.setIntensity(settings.intensity); // Use a value between 0 and 15 for brightness
-  matrix.setRotation(1);    // The same hold for the last display
-  matrix.fillScreen(LOW);  // Задание цвета фона экрана (вне букв) LOW - темный, HIGH - светлый
+  matrix.begin();       // запускаем
+  matrix.setBright(1);  // яркость 0..15
 
 
-  displayText("__:__WAIT ");
+  matrix.println("WAIT ");
+  matrix.print("__:__ ");
+  matrix.update();
 
 
   // Модуль погоды BME280
@@ -113,15 +94,13 @@ void setup() {
   bme.setMode(NORMAL_MODE);                             // Спустя 10 секунд переключаем датчик в обычный режим
   bme.begin();                                          // Переинициализируем датчик после изменения настроек - обязательная процедура
 
-  //matrix.fillScreen(1);
+  matrix.clear();
 }
 
 void loop() {
 
   // Обработка энкодера
   encoderTick();
-  // Обработка eeprom
-  //memory.tick();
 
   if (millis() - timer >= T_500MLS) { // таймер на millis()
     timer = millis(); // сброс
@@ -129,23 +108,25 @@ void loop() {
     // получаем все данные в структуру
     DateTime now = rtc.getTime();
     boolean blink = now.second % 2;
+    String extra = printExtra(now);
 
     if (isEdit) {
       tape = (isHour  ? printDigits(date.hour) : "  ")
              + (blink ? ":" : " ")
-             + (isMinute  ? printDigits(date.minute) : "  ")
-             + printExtra(now);
+             + (isMinute  ? printDigits(date.minute) : "  ");
 
     } else {
       tape = printDigits(now.hour)
              + (blink ? ":" : " ")
-             + printDigits(now.minute)
-             + printExtra(now);
-
+             + printDigits(now.minute);
     }
-
-    displayText(tape);
+    
+    matrix.setCursor(1, 0);
+    matrix.println(tape);
+    matrix.print(extra);
+    matrix.update();
   }
+
 }
 
 String printExtra(DateTime now) {
@@ -161,30 +142,7 @@ String printExtra(DateTime now) {
 
 // =======================================================================
 
-// =======================================================================
-void displayText(String text) {
 
-  for (int i = 0; i < text.length(); i++) {
-
-    int letter = (matrix.width()) - i * (width);
-    int x = (matrix.width() + 1) - letter;
-    int y = (matrix.height() - 8) / 2; // Центрируем текст по Вертикали
-    if (i > 4) x = x + 3;
-    matrix.drawChar(x, y, text[i], HIGH, LOW, 1);
-
-    matrix.write(); // Вывод на дисплей
-
-  }
-
-}
-String sp() {
-
-
-  unsigned char n = '\0xB0';
-  char m[2] = { '0', '\0' };
-  m[0] = n;
-  return String(m);
-}
 
 //-------------------------------------------
 String utf8rus(String source)
@@ -231,6 +189,8 @@ String utf8rus(String source)
 
 String printDigits(int digits)
 {
+  // utility function for digital clock display: prints preceding colon and leading 0
+
   if (digits < 10) {
     return "0" + (String)digits;
   }
@@ -294,26 +254,14 @@ void encoderTick() {
         }
       }
     }
-  } else {
-    if (enc.isRight()) {
-      settings.intensity++;
-      if (settings.intensity >= 15) settings.intensity = 15;
-      matrix.setIntensity(settings.intensity);
-      memory.updateNow();
-      
-    }
-    if (enc.isLeft()) {
-      settings.intensity--;
-      if (settings.intensity <= 0) settings.intensity = 0;
-      matrix.setIntensity(settings.intensity);
-      memory.updateNow();
-      
-    }
   }
 
   // *********** УДЕРЖАНИЕ ЭНКОДЕРА **********
   if (enc.isHolded()) {       // кнопка удержана
     //Serial.println("Encoder holded");
   }
+
+
+
 
 }
