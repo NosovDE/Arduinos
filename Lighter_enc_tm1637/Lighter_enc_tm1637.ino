@@ -103,7 +103,7 @@ void setup() {
   disp.brightness(7);  // яркость, 0 - 7 (минимум - максимум)
 
   disp.point( false);
-  disp.displayInt( value); disp.displayInt( value);
+  disp.displayInt( value);
   //-----------------------------------
   LEDS.setBrightness(max_bright);  // ограничить максимальную яркость
 

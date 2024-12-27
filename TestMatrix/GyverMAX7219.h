@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <GyverGFX.h>
-#include "FastIO.h"
+#include <FastIO.h>
 
 #ifndef MAX_SPI_SPEED
 #define MAX_SPI_SPEED 1000000

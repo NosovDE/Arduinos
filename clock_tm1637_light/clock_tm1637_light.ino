@@ -103,7 +103,7 @@ void setup() {
   rtc.begin();
   //if (rtc.lostPower()) {
   //  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    rtc.adjust(DateTime(F(__DATE__), F("00:00")));
+  //  rtc.adjust(DateTime(F(__DATE__), F("00:00")));
   
   //}
   DateTime now = rtc.now();

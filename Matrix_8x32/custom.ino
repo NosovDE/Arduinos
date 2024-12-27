@@ -67,65 +67,90 @@
 void customModes() {
   switch (thisMode) {
 
-    case 0: //fillString("КРАСНЫЙ", CRGB::Red);
-      matrixRoutine();
-      break;
-    case 1: //fillString("РАДУГА", 1);
+    case 0:
       snowRoutine();
+      //fillString("С НОВЫМ ГОДОМ 2019! ПРОГРАММИРУЕМ АРДУИНО", 2);
       break;
-    case 2: //fillString("RGB LED", 2);
+    case 1:
+      matrixRoutine();
+      //fillString("РАДУГА", 1);
+      break;
+    case 2:
       fireRoutine();
+      //fillString("RGB LED", 2);
       break;
-    case 3: //madnessNoise();
-      clockRoutine();
+    case 3:
+      fireRoutine();
+      //madnessNoise();
       break;
-    case 4: cloudNoise();
+    case 4:
+      //snakeRoutine();
+      //cloudNoise();
       break;
-    case 5: lavaNoise();
+    case 5:
+     // starfallRoutine();
+      //lavaNoise();
       break;
-    case 6: plasmaNoise();
+    case 6:
+      //arkanoidRoutine();
+
+      // mazeRoutine();
+      //plasmaNoise();
       break;
-    case 7: rainbowNoise();
+    case 7:
+      //ballsRoutine();
+      // runnerRoutine();
+      //rainbowNoise();
       break;
-    case 8: rainbowStripeNoise();
+    case 8:
+      //sparklesRoutine();
+      //  flappyRoutine();
+
+      //rainbowStripeNoise();
       break;
-    case 9: zebraNoise();
+    case 9: //zebraNoise();
+
       break;
-    case 10: forestNoise();
+    case 10: //forestNoise();
+
+      // clockRoutine();
       break;
-    case 11: oceanNoise();
+    case 11: //oceanNoise();
+
       break;
-    case 12: snowRoutine();
+
+
+    case 12:
       break;
-    case 13: sparklesRoutine();
+    case 13:// sparklesRoutine();
       break;
-    case 14: matrixRoutine();
+    case 14:
       break;
-    case 15: starfallRoutine();
+    case 15:// starfallRoutine();
       break;
-    case 16: ballRoutine();
+    case 16: //ballRoutine();
       break;
-    case 17: ballsRoutine();
+    case 17:// ballsRoutine();
       break;
-    case 18: rainbowRoutine();
+    case 18:// rainbowRoutine();
       break;
-    case 19: rainbowDiagonalRoutine();
+    case 19: //rainbowDiagonalRoutine();
       break;
-    case 20: fireRoutine();
+    case 20:
       break;
-    case 21: snakeRoutine();
+    case 21:
       break;
-    case 22: tetrisRoutine();
+    case 22:
       break;
-    case 23: mazeRoutine();
+    case 23:
       break;
-    case 24: runnerRoutine();
+    case 24:
       break;
-    case 25: flappyRoutine();
+    case 25:
       break;
-    case 26: arkanoidRoutine();
+    case 26:
       break;
-    case 27: clockRoutine();
+    case 27:
       break;
 
 
@@ -175,8 +200,8 @@ timerMinim gifTimer(D_GIF_SPEED);
     }
   }
   }
-*/
 
+*/
 // ********************* ОСНОВНОЙ ЦИКЛ РЕЖИМОВ *******************
 #if (SMOOTH_CHANGE == 1)
 byte fadeMode = 4;

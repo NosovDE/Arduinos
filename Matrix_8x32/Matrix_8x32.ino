@@ -10,22 +10,22 @@
 */
 
 // GyverMatrixOS
-// Версия прошивки 1.10, совместима с приложением GyverMatrixBT версии 1.12 и выше
+// Версия прошивки 1.9, совместима с приложением GyverMatrixBT версии 1.12 и выше
+
 
 // ************************ МАТРИЦА *************************
 // если прошивка не лезет в Arduino NANO - отключай режимы! Строка 60 и ниже
 
-#define BRIGHTNESS 220        // стандартная маскимальная яркость (0-255)
-#define CURRENT_LIMIT 3000    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
+#define BRIGHTNESS 100        // стандартная маскимальная яркость (0-255)
+#define CURRENT_LIMIT 1000    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 
-#define WIDTH 16              // ширина матрицы
-#define HEIGHT 16             // высота матрицы
-#define SEGMENTS 1            // диодов в одном "пикселе" (для создания матрицы из кусков ленты)
+#define WIDTH 32              // ширина матрицы
+#define HEIGHT 8             // высота матрицы
 
 #define COLOR_ORDER GRB       // порядок цветов на ленте. Если цвет отображается некорректно - меняйте. Начать можно с RGB
 
 #define MATRIX_TYPE 0         // тип матрицы: 0 - зигзаг, 1 - параллельная
-#define CONNECTION_ANGLE 1    // угол подключения: 0 - левый нижний, 1 - левый верхний, 2 - правый верхний, 3 - правый нижний
+#define CONNECTION_ANGLE 3    // угол подключения: 0 - левый нижний, 1 - левый верхний, 2 - правый верхний, 3 - правый нижний
 #define STRIP_DIRECTION 1     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
 // при неправильной настрйоке матрицы вы получите предупреждение "Wrong matrix parameters! Set to default"
 // шпаргалка по настройке матрицы здесь! https://alexgyver.ru/matrix_guide/
@@ -43,7 +43,7 @@
 #define DEMO_GAME_SPEED 60    // скорость игр в демо режиме (мс)
 
 boolean AUTOPLAY = 1;         // 0 выкл / 1 вкл автоматическую смену режимов (откл. можно со смартфона)
-int AUTOPLAY_PERIOD = 600;     // время между авто сменой режимов (секунды)
+int AUTOPLAY_PERIOD = 10;     // время между авто сменой режимов (секунды)
 #define IDLE_TIME 10          // время бездействия кнопок или Bluetooth (в секундах) после которого запускается автосмена режимов и демо в играх
 
 // о поддерживаемых цветах читай тут https://alexgyver.ru/gyvermatrixos-guide/
@@ -59,8 +59,8 @@ int AUTOPLAY_PERIOD = 600;     // время между авто сменой р
 
 #define USE_BUTTONS 0         // использовать физические кнопки управления играми (0 нет, 1 да)
 #define BT_MODE 0             // использовать блютус (0 нет, 1 да)
-#define USE_NOISE_EFFECTS 0   // крутые полноэкранные эффекты (0 нет, 1 да) СИЛЬНО ЖРУТ ПАМЯТЬ!!!11
-#define USE_FONTS 0           // использовать буквы (бегущая строка) (0 нет, 1 да)
+#define USE_NOISE_EFFECTS 1   // крутые полноэкранные эффекты (0 нет, 1 да) СИЛЬНО ЖРУТ ПАМЯТЬ!!!11
+#define USE_FONTS 1           // использовать буквы (бегущая строка) (0 нет, 1 да)
 #define USE_CLOCK 0           // использовать часы (0 нет, 1 да)
 
 // игры
@@ -87,7 +87,7 @@ int AUTOPLAY_PERIOD = 600;     // время между авто сменой р
 #define LED_PIN 2           // пин ленты
 #define BUTT_UP 14          // кнопка вверх
 #define BUTT_DOWN 13        // кнопка вниз
-#define BUTT_LEFT 0         // кнопка влево
+#define BUTT_LEFT 16        // кнопка влево
 #define BUTT_RIGHT 12       // кнопка вправо
 #define BUTT_SET 15         // кнопка выбор/игра
 
@@ -103,36 +103,7 @@ int AUTOPLAY_PERIOD = 600;     // время между авто сменой р
 
 // ******************************** ДЛЯ РАЗРАБОТЧИКОВ ********************************
 #define DEBUG 0
-#define NUM_LEDS WIDTH * HEIGHT * SEGMENTS
-
-#define RUNNING_STRING 0
-#define CLOCK_MODE 1
-#define GAME_MODE 2
-#define MADNESS_NOISE 3
-#define CLOUD_NOISE 4
-#define LAVA_NOISE 5
-#define PLASMA_NOISE 6
-#define RAINBOW_NOISE 7
-#define RAINBOWSTRIPE_NOISE 8
-#define ZEBRA_NOISE 9
-#define FOREST_NOISE 10
-#define OCEAN_NOISE 11
-#define SNOW_ROUTINE 12
-#define SPARKLES_ROUTINE 13
-#define MATRIX_ROUTINE 14
-#define STARFALL_ROUTINE 15
-#define BALL_ROUTINE 16
-#define BALLS_ROUTINE 17
-#define RAINBOW_ROUTINE 18
-#define RAINBOWDIAGONAL_ROUTINE 19
-#define FIRE_ROUTINE 20
-#define IMAGE_MODE 21
-
-#if (MCU_TYPE == 1)
-#define FASTLED_INTERRUPT_RETRY_COUNT 0
-#define FASTLED_ALLOW_INTERRUPTS 0
-#include <ESP8266WiFi.h>
-#endif
+#define NUM_LEDS WIDTH * HEIGHT
 
 #include "FastLED.h"
 CRGB leds[NUM_LEDS];
@@ -187,10 +158,6 @@ RTC_DS3231 rtc;
 void setup() {
 #if (BT_MODE == 1)
   Serial.begin(9600);
-#endif
-
-#if (MCU_TYPE == 1)
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
 #endif
 
 #if (USE_CLOCK == 1 && (MCU_TYPE == 0 || MCU_TYPE == 1))

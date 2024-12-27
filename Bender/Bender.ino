@@ -7,17 +7,17 @@
 #define MTRX_DAT 11;
 #define MTRX_CLK 13;
 
-#define ANALYZ_WIDTH (4 * 8)
+#define ANALYZ_WIDTH (3 * 8)
 
 
 // data
-MAX7219<6, 1, 10, 11, 13> mtrx;
+MAX7219<5, 1, 10, 11, 13> mtrx;
 
 struct Data {
   bool state = 0;
   int8_t vol = 10;
-  int8_t bright_eyes = 10;
-  int8_t bright_mouth = 3;
+  int8_t bright_eyes = 0;
+  int8_t bright_mouth = 0;
   uint16_t trsh = 50;
   uint8_t mode = 0;
   int8_t station = 0;
@@ -31,7 +31,7 @@ bool pulse = 0;
 // ========================= MATRIX =========================
 void upd_bright() {
   uint8_t m = data.bright_mouth, e = data.bright_eyes;
-  uint8_t br[] = {m, m, m, m, e, e, 0, 0};
+  uint8_t br[] = {m, m, m, e, e, 0, 0};
   mtrx.setBright(br);
 }
 
@@ -59,7 +59,8 @@ void draw_eyeb(uint8_t i, int x, int y, int w = 2) {
   x += ANALYZ_WIDTH + i * 8;
   mtrx.rect(x, y, x + w - 1, y + w - 1, GFX_CLEAR);
 }
-void anim_search() {
+
+void drawSearch() {
   static int8_t pos = 4, dir = 1;
   boolean tmr = true;
   if (tmr) {
@@ -72,11 +73,13 @@ void anim_search() {
     mtrx.update();
   }
 }
-void change_state() {
+
+
+void drawSleepy() {
   mtrx.clear();
-  if (data.state) {
+  if (random(10) % 2 > 1) {
     upd_bright();
-    //    square_tmr.start(600);
+
     draw_eye(0);
     draw_eye(1);
     draw_eyeb(0, 2, 2, 4);
@@ -89,6 +92,7 @@ void change_state() {
     draw_eyeb(0, 3, 5);
     draw_eyeb(1, 3, 5);
   }
+  delay(500);
   mtrx.update();
 }
 // ========================= ANALYZ =========================
@@ -104,7 +108,7 @@ void analyz0(uint8_t vol) {
     mtrx.dot(i, val);
   }
 }
-void analyz1(uint8_t vol) {
+void analyzWave(uint8_t vol) {
   static uint8_t prevs[ANALYZ_WIDTH];
   for (uint8_t i = 0; i < ANALYZ_WIDTH - 1; i++) prevs[i] = prevs[i + 1];
   prevs[ANALYZ_WIDTH - 1] = 9 * vol / (100 + 1);
@@ -129,80 +133,130 @@ void analyz1(uint8_t vol) {
 
 void setup(void) {
   mtrx.begin();
+  upd_bright();
 }
 
 
 void loop(void) {
 
-  upd_bright();
+
+  // mtrx.clear();
+  // mtrx.update();
+  for (int i = 0; i < 5 + random(10); i++) {
+    drawEye();
+    analyz0(random(50));
+    mtrx.update();
+
+
+  }
   mtrx.clear();
-  mtrx.update();
+
+  for (int i = 0; i < 25 + random(10); i++) {
+    drawSearch();
+    analyz0(random(3));
+    mtrx.update();
+    delay(100);
+
+  }
+  mtrx.clear();
 
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 35 + random(20); i++) {
+    drawCrazy();
+    analyz0(random(128));
+    mtrx.update();
+    delay(100);
+    mtrx.clear();
+  }
+
+  /*
+    for (int i = 0; i < 10; i++) {
+      drawWave();
+      analyzWave(random(98));
+       mtrx.update();
+      delay(100);
+      mtrx.clear();
+    }
+  */
+
+  /*
+    mtrx.update();
     draw_eye(0);
     draw_eye(1);
     draw_eyeb(0, 3, 3);
     draw_eyeb(1, 3, 3);
-    for (int i = 0; i < 10; i++) {
-      static uint16_t pos;
-      pos += 15;
-      uint8_t x = inoise8(pos);
-      uint8_t y = inoise8(pos + UINT16_MAX / 4);
-      x = constrain(x, 40, 255 - 40);
-      y = constrain(y, 40, 255 - 40);
-      x = map(x, 40, 255 - 40, 2, 5);
-      y = map(y, 40, 255 - 40, 2, 5);
-      if (pulse) {
-        pulse = 0;
-        int8_t sx = random(-1, 1);
-        int8_t sy = random(-1, 1);
-        draw_eyeb(0, x + sx, y + sy, 3);
-        draw_eyeb(1, x + sx, y + sy, 3);
-      } else {
-        draw_eyeb(0, x, y);
-        draw_eyeb(1, x, y);
-      }
-    }
+
+    mtrx.update();
+
+    delay(2000);
+    /*
+    draw_eye(0);
+    draw_eye(1);
+    draw_eyeb(0, 3, 3);
+    draw_eyeb(1, 3, 3);
+
+    drawWave();
 
     analyz0(random(128));
     mtrx.update();
-    delay(50);
-    mtrx.clear();
-  }
-  /*
-    for (int i = 0; i < 100; i++) {
-      analyz1(random(128));
-      mtrx.update();
-      delay(50);
-      mtrx.clear();
+    delay(3000);
+
+    drawCrazy();
+    for (int i = 0; i < 10; i++) {
+      change_state();
     }
+
+    delay(2000);
+
+    draw_eyeb(0, 4, 3, 3);
+    draw_eyeb(1, 1, 3, 3);
+
     mtrx.update();
-    delay(1000);
+
+    delay(2000);
+
+    draw_eyeb(0, 4, 3, 3);
+    draw_eyeb(1, 1, 3, 3);
+    mtrx.update();
+
+    delay(2000);
+
+
+
+
+    upd_bright();
+    mtrx.clear();
+    mtrx.update();
   */
-  //draw_eye(0);
-  // for (int i = 0; i < 10; i++) {
-  // anim_search();
-  //  mtrx.update();
+}
 
-  //  delay(400);
-  // }
-  // mtrx.clear();
-  // mtrx.update();
-
-
+void drawCrazy() {
   draw_eye(0);
   draw_eye(1);
-  draw_eyeb(0, 3, 3);
-  draw_eyeb(1, 3, 3);
+
+  if (random(100) % 2) {
+    draw_eyeb(0, 4, 3, 3);
+    draw_eyeb(1, 1, 3, 3);
+  } else {
+    draw_eyeb(0, 3, 3);
+    draw_eyeb(1, 3, 3);
+  }
   mtrx.lineH(0, ANALYZ_WIDTH, ANALYZ_WIDTH + 16 - 1, GFX_CLEAR);
   mtrx.lineH(1, ANALYZ_WIDTH + 5, ANALYZ_WIDTH + 5 + 6 - 1, GFX_CLEAR);
   mtrx.lineH(2, ANALYZ_WIDTH + 6, ANALYZ_WIDTH + 6 + 4 - 1, GFX_CLEAR);
   mtrx.lineH(3, ANALYZ_WIDTH + 7, ANALYZ_WIDTH + 7 + 2 - 1, GFX_CLEAR);
-  analyz0(random(128));
-  mtrx.update();
-  delay(3000);
 
+  // mtrx.update();
+}
+
+void drawWave() {
+  mtrx.lineH(0, ANALYZ_WIDTH, ANALYZ_WIDTH + 16 - 1, GFX_CLEAR);
+  mtrx.lineH(1, ANALYZ_WIDTH + 5, ANALYZ_WIDTH + 5 + 6 - 1, GFX_CLEAR);
+  mtrx.lineH(2, ANALYZ_WIDTH + 6, ANALYZ_WIDTH + 6 + 4 - 1, GFX_CLEAR);
+  mtrx.lineH(3, ANALYZ_WIDTH + 7, ANALYZ_WIDTH + 7 + 2 - 1, GFX_CLEAR);
+}
+
+void drawEye() {
   for (int i = 0; i < 10; i++) {
     static uint16_t pos;
     pos += 15;
@@ -228,39 +282,6 @@ void loop(void) {
     draw_eye(1);
   }
 
-  mtrx.clear();
-  for (int i = 0; i < 10; i++) {
-    change_state();
-  }
+  //mtrx.clear();
 
-  delay(2000);
-
-  // print_val('v', data.vol);
-
-  // mtrx.update();
-
-
-
-  draw_eyeb(0, 4, 3, 3);
-  draw_eyeb(1, 1, 3, 3);
-  mtrx.lineH(0, ANALYZ_WIDTH, ANALYZ_WIDTH + 16 - 1, GFX_CLEAR);
-  mtrx.lineH(1, ANALYZ_WIDTH + 5, ANALYZ_WIDTH + 5 + 6 - 1, GFX_CLEAR);
-  mtrx.lineH(2, ANALYZ_WIDTH + 6, ANALYZ_WIDTH + 6 + 4 - 1, GFX_CLEAR);
-  mtrx.lineH(3, ANALYZ_WIDTH + 7, ANALYZ_WIDTH + 7 + 2 - 1, GFX_CLEAR);
-  mtrx.update();
-
-  delay(2000);
-
-  draw_eyeb(0, 4, 3, 3);
-  draw_eyeb(1, 1, 3, 3);
-  mtrx.update();
-
-  delay(2000);
-
-
-
-
-  upd_bright();
-  mtrx.clear();
-  mtrx.update();
 }

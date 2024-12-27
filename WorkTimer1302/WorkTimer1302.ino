@@ -35,7 +35,7 @@ void setup() {
   rtc.setDate(21, 01, 2010);
 
   disp.clear();
-  disp.brightness(7);  // яркость, 0 - 7 (минимум - максимум)
+  disp.brightness(0);  // яркость, 0 - 7 (минимум - максимум)
 }
 
 
